@@ -220,6 +220,40 @@ final class StreamingTests: XCTestCase {
         }
     }
     
+    // BDD: GIVEN message_delta chunk with partial usage (output_tokens only) WHEN decoded THEN proper handling
+    func testMessageDeltaChunkWithPartialUsage() throws {
+        // Test the specific case from feedback.md - message_delta with only output_tokens
+        let messageDeltaJSON = """
+        {
+            "type": "message_delta",
+            "delta": {
+                "stop_reason": "end_turn",
+                "stop_sequence": null
+            },
+            "usage": {
+                "output_tokens": 1309
+            }
+        }
+        """
+        
+        let data = messageDeltaJSON.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        
+        let chunk = try decoder.decode(StreamingChunk.self, from: data)
+        XCTAssertEqual(chunk.type, "message_delta")
+        
+        if case .messageDelta(let messageDelta) = chunk {
+            XCTAssertEqual(messageDelta.delta.stopReason, "end_turn")
+            XCTAssertNil(messageDelta.delta.stopSequence)
+            XCTAssertNotNil(messageDelta.usage)
+            // Key fix: inputTokens should be nil (not present in JSON)
+            XCTAssertNil(messageDelta.usage?.inputTokens)
+            XCTAssertEqual(messageDelta.usage?.outputTokens, 1309)
+        } else {
+            XCTFail("Expected messageDelta chunk")
+        }
+    }
+    
     // BDD: GIVEN streaming flow with message_delta WHEN processing THEN proper event sequence is handled
     func testStreamingFlowWithMessageDelta() throws {
         // Test that message_delta fits properly in the streaming flow

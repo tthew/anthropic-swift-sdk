@@ -46,7 +46,7 @@ struct BasicChatExample {
                case .text(let text) = textContent {
                 print("Claude's response:")
                 print(text)
-                print("\nToken usage: \(response.usage.inputTokens) in, \(response.usage.outputTokens) out")
+                print("\nToken usage: \(response.usage.inputTokens ?? 0) in, \(response.usage.outputTokens) out")
             }
             
         } catch {

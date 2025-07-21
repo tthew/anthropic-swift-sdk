@@ -206,7 +206,9 @@ public enum ClaudeModel: String, CaseIterable, Codable, Equatable {
 
 /// Token usage statistics
 public struct Usage: Codable, Equatable {
-    public let inputTokens: Int
+    /// Input tokens used - may be nil in partial usage updates (e.g., message_delta chunks)
+    public let inputTokens: Int?
+    /// Output tokens generated
     public let outputTokens: Int
     
     private enum CodingKeys: String, CodingKey {
@@ -214,6 +216,12 @@ public struct Usage: Codable, Equatable {
         case outputTokens = "output_tokens"
     }
     
+    public init(inputTokens: Int?, outputTokens: Int) {
+        self.inputTokens = inputTokens
+        self.outputTokens = outputTokens
+    }
+    
+    /// Convenience initializer for full usage information
     public init(inputTokens: Int, outputTokens: Int) {
         self.inputTokens = inputTokens
         self.outputTokens = outputTokens

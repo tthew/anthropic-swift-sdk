@@ -49,7 +49,7 @@ class IntegrationTests: XCTestCase {
         XCTAssertFalse(response.content.isEmpty)
         XCTAssertEqual(response.role, .assistant)
         XCTAssertGreaterThan(response.usage.outputTokens, 0)
-        XCTAssertGreaterThan(response.usage.inputTokens, 0)
+        XCTAssertGreaterThan(response.usage.inputTokens ?? 0, 0)
         
         // Check that we got a text response
         guard let firstContent = response.content.first,
