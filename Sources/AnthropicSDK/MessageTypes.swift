@@ -165,9 +165,9 @@ public struct Message: Codable, Equatable {
 /// Available Claude models with their capabilities and context windows
 public enum ClaudeModel: String, CaseIterable, Codable, Equatable {
     /// Claude 4 Opus - World's most intelligent model with hybrid reasoning for complex coding and agentic workflows
-    case claude4Opus = "claude-4-opus-20250522"
+    case claude4Opus = "claude-opus-4-20250514"
     /// Claude 4 Sonnet - Advanced model with hybrid reasoning, superior coding and precise instruction following
-    case claude4Sonnet = "claude-4-sonnet-20250522"
+    case claude4Sonnet = "claude-sonnet-4-20250514"
     /// Claude 3.5 Sonnet - Fastest, most intelligent model for complex tasks
     case claude3_5Sonnet = "claude-3-5-sonnet-20241022"
     /// Claude 3.5 Haiku - Fast and lightweight for everyday tasks

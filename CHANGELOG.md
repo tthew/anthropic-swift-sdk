@@ -5,6 +5,29 @@ All notable changes to the Anthropic Swift SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-07-21
+
+### 🚨 CRITICAL HOTFIX - Model Identifier Correction
+
+#### Fixed
+- **Claude 4 Model Identifiers**: Corrected model identifiers to match Anthropic API specifications
+  - ❌ **Before**: `"claude-4-opus-20250522"` and `"claude-4-sonnet-20250522"` (causing 404 errors)
+  - ✅ **After**: `"claude-opus-4-20250514"` and `"claude-sonnet-4-20250514"` (official API identifiers)
+- **HTTP 404 Resolution**: Fixed all API calls to Claude 4 models that were previously failing
+- **Test Suite Updates**: Updated all tests to expect correct model identifiers
+- **Documentation Updates**: Updated README with correct model identifiers and version references
+
+#### Impact
+- **Breaking Issue Resolved**: All Claude 4 functionality now works correctly
+- **API Compatibility**: SDK now matches official Anthropic API model identifiers
+- **Version Tracking**: Added comprehensive hotfix tracking in Version.swift
+
+#### Migration
+Users experiencing 404 errors with Claude 4 models should:
+1. Update to version 1.1.1
+2. Clear Swift Package Manager cache
+3. Verify Claude 4 models are now accessible
+
 ## [1.0.0] - 2024-06-21
 
 ### CRITICAL FIXES APPLIED - Implementation Plan Compliance

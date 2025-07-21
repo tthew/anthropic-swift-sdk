@@ -3,18 +3,19 @@ import Foundation
 /// Version information for the Anthropic Swift SDK
 public struct SDKVersion {
     /// The current version of the SDK
-    public static let current = "1.1.0"
+    public static let current = "1.1.1"
     
     /// The commit hash of this release
-    public static let commitHash = "2ff33ea"
+    public static let commitHash = "867da3d"
     
     /// Release date
     public static let releaseDate = "2025-07-21"
     
     /// Major features in this version
     public static let features = [
-        "Claude 4 Opus & Sonnet Models",
-        "Hybrid Reasoning Support", 
+        "CRITICAL FIX: Corrected Claude 4 Model Identifiers",
+        "Claude 4 Opus & Sonnet Models", 
+        "Hybrid Reasoning Support",
         "Complete Models Discovery API",
         "Enhanced Performance Optimizations"
     ]

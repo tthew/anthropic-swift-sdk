@@ -84,8 +84,8 @@ final class ModelsAPITests: XCTestCase {
         
         // Verify each model type is represented
         let modelIds = allModels.map { $0.id }
-        XCTAssertTrue(modelIds.contains("claude-4-opus-20250522"))
-        XCTAssertTrue(modelIds.contains("claude-4-sonnet-20250522"))
+        XCTAssertTrue(modelIds.contains("claude-opus-4-20250514"))
+        XCTAssertTrue(modelIds.contains("claude-sonnet-4-20250514"))
         XCTAssertTrue(modelIds.contains("claude-3-5-sonnet-20241022"))
         XCTAssertTrue(modelIds.contains("claude-3-5-haiku-20241022"))
         XCTAssertTrue(modelIds.contains("claude-3-opus-20240229"))

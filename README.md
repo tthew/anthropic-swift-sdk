@@ -311,6 +311,8 @@ let customClient = try AnthropicClient(
 
 | Model | Description | Context Window | Vision Support |
 |-------|-------------|----------------|----------------|
+| `claude4Opus` | Most intelligent model with hybrid reasoning | 200K tokens | ✅ |
+| `claude4Sonnet` | Advanced model with superior coding capabilities | 200K tokens | ✅ |
 | `claude3_5Sonnet` | Most intelligent, balanced performance | 200K tokens | ✅ |
 | `claude3_5Haiku` | Fastest, lightweight for everyday tasks | 200K tokens | ❌ |
 | `claude3Opus` | Most powerful for complex reasoning | 200K tokens | ✅ |
@@ -486,24 +488,24 @@ In Xcode:
 
 Or update to specific version in `Package.swift`:
 ```swift
-.package(url: "https://github.com/tthew/anthropic-swift-sdk", from: "1.1.0")
+.package(url: "https://github.com/tthew/anthropic-swift-sdk", from: "1.1.1")
 ```
 
 #### Verify Latest Version
 Expected output with Claude 4 support:
 ```
-Anthropic Swift SDK v1.1.0
-Commit: 2ff33ea
+Anthropic Swift SDK v1.1.1
+Commit: [latest]
 Claude 4 Support: ✅ Available
 
 Available Models:
-  - claude-4-opus-20250522
-  - claude-4-sonnet-20250522
+  - claude-opus-4-20250514
+  - claude-sonnet-4-20250514
   - claude-3-5-sonnet-20241022
   [... other models]
 ```
 
-If you're still seeing older models only, ensure you're using **version 1.1.0 or later**.
+If you're still seeing older models only, ensure you're using **version 1.1.1 or later**.
 
 ## Contributing
 
