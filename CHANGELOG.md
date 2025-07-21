@@ -5,6 +5,46 @@ All notable changes to the Anthropic Swift SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-07-21
+
+### 🚨 CRITICAL FIX - Usage Object Parsing for message_delta Chunks
+
+#### Fixed
+- **Usage Struct Parsing**: Made `inputTokens` optional in `Usage` struct to handle partial usage information
+  - Fixed critical parsing error: "Missing key 'input_tokens' at usage"
+  - Final message_delta chunks may contain only `output_tokens` field
+  - Maintains backward compatibility with existing code using convenience initializers
+- **message_delta Compatibility**: Resolved streaming failures with Claude 3.5 Haiku and other models
+- **Example Code Updates**: Updated examples to safely handle optional `inputTokens` values
+
+#### Added
+- **Comprehensive Testing**: New test `testMessageDeltaChunkWithPartialUsage` validates exact failure scenario from feedback
+- **Enhanced Documentation**: Added inline documentation explaining when `inputTokens` may be nil
+- **Backward Compatibility**: Preserved existing `Usage(inputTokens: Int, outputTokens: Int)` initializer
+
+#### Impact
+- **Streaming Reliability**: Eliminates critical parsing errors that forced fallback to non-streaming mode
+- **API Completeness**: Full compatibility with Claude's message_delta chunk format specifications
+- **Developer Experience**: No breaking changes - existing code continues to work unchanged
+- **Error Resolution**: Directly fixes the parsing error reported in feedback.md
+
+#### Root Cause Analysis
+The issue occurred because:
+1. Claude's API sends message_delta chunks with partial usage information near stream completion
+2. These chunks contain only `output_tokens` (final token count) without `input_tokens`
+3. SDK's rigid `Usage` struct required both fields, causing JSON decoding failures
+4. Parser threw "Missing key 'input_tokens'" instead of gracefully handling partial data
+
+#### Migration
+- **No Breaking Changes**: Existing code continues to work without modifications
+- **Optional Handling**: When accessing `inputTokens`, use nil-coalescing or optional binding:
+  ```swift
+  // Safe access patterns:
+  let inputCount = usage.inputTokens ?? 0
+  if let inputTokens = usage.inputTokens { ... }
+  ```
+- **Example Updates**: All included examples updated to demonstrate proper optional handling
+
 ## [1.1.3] - 2025-07-21
 
 ### 🔧 HOTFIX - Complete message_delta Chunk Support
