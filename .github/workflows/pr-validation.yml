@@ -1,0 +1,317 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ main ]
+
+# Only run one validation per PR at a time
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-info:
+    name: PR Information & Basic Validation
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    outputs:
+      has-breaking-changes: ${{ steps.breaking-changes.outputs.detected }}
+      has-version-changes: ${{ steps.version-changes.outputs.detected }}
+      
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for proper diff analysis
+        
+    - name: Get PR Information
+      run: |
+        echo "## PR Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **PR Number**: #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Title**: ${{ github.event.pull_request.title }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Author**: @${{ github.event.pull_request.user.login }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Base Branch**: ${{ github.event.pull_request.base.ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Head Branch**: ${{ github.event.pull_request.head.ref }}" >> $GITHUB_STEP_SUMMARY
+        
+        # Get changed files
+        echo "### Changed Files" >> $GITHUB_STEP_SUMMARY
+        git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | head -20 | while read file; do
+          echo "- \`$file\`" >> $GITHUB_STEP_SUMMARY
+        done
+    
+    - name: Check for Breaking Changes
+      id: breaking-changes
+      run: |
+        echo "Analyzing potential breaking changes..."
+        
+        breaking_detected=false
+        
+        # Check for changes in public API files
+        api_files=(
+          "Sources/AnthropicSDK/AnthropicClient.swift"
+          "Sources/AnthropicSDK/MessageTypes.swift" 
+          "Sources/AnthropicSDK/StreamingTypes.swift"
+          "Sources/AnthropicSDK/ToolTypes.swift"
+          "Sources/AnthropicSDK/BatchTypes.swift"
+          "Sources/AnthropicSDK/FileTypes.swift"
+          "Sources/AnthropicSDK/ThinkingTypes.swift"
+        )
+        
+        echo "### Breaking Change Analysis" >> $GITHUB_STEP_SUMMARY
+        
+        for file in "${api_files[@]}"; do
+          if git diff --quiet origin/${{ github.event.pull_request.base.ref }}...HEAD -- "$file"; then
+            continue  # No changes in this file
+          fi
+          
+          echo "Checking $file for breaking changes..."
+          
+          # Look for potentially breaking patterns
+          breaking_patterns=(
+            "public.*func.*->.*throws" # Changed function signatures
+            "public.*var.*:" # Changed property types
+            "public.*let.*:" # Changed constant types  
+            "public.*init" # Changed initializers
+            "public.*enum" # Enum changes
+            "public.*struct" # Struct changes
+            "public.*class" # Class changes
+          )
+          
+          for pattern in "${breaking_patterns[@]}"; do
+            if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- "$file" | grep -E "^[-].*$pattern" > /dev/null; then
+              echo "⚠️ Potential breaking change detected in $file" >> $GITHUB_STEP_SUMMARY
+              echo "  - Removed/modified: \`$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- "$file" | grep -E "^[-].*$pattern" | head -1 | sed 's/^[-]//')\`" >> $GITHUB_STEP_SUMMARY
+              breaking_detected=true
+            fi
+          done
+          
+          echo "- ✅ $file: No obvious breaking changes detected" >> $GITHUB_STEP_SUMMARY
+        done
+        
+        if [ "$breaking_detected" = true ]; then
+          echo "detected=true" >> $GITHUB_OUTPUT
+          echo "::warning::Potential breaking changes detected. Please review carefully and update CHANGELOG.md accordingly."
+        else
+          echo "detected=false" >> $GITHUB_OUTPUT
+          echo "- ✅ No breaking changes detected in public API" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Check Version Changes
+      id: version-changes
+      run: |
+        echo "Checking for version changes..."
+        
+        version_changed=false
+        
+        if git diff --quiet origin/${{ github.event.pull_request.base.ref }}...HEAD -- "Sources/AnthropicSDK/Version.swift"; then
+          echo "- ℹ️ No version changes detected" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- 📦 Version.swift has been modified" >> $GITHUB_STEP_SUMMARY
+          version_changed=true
+          
+          # Show the version diff
+          echo "### Version Changes" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- "Sources/AnthropicSDK/Version.swift" | head -20 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "$version_changed" = true ]; then
+          echo "detected=true" >> $GITHUB_OUTPUT
+        else
+          echo "detected=false" >> $GITHUB_OUTPUT
+        fi
+
+  changelog-validation:
+    name: Changelog Validation
+    runs-on: ubuntu-latest  
+    needs: pr-info
+    if: github.event.pull_request.draft == false
+    
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Validate Changelog Updates
+      run: |
+        echo "### Changelog Validation" >> $GITHUB_STEP_SUMMARY
+        
+        # Check if CHANGELOG.md was updated
+        if git diff --quiet origin/${{ github.event.pull_request.base.ref }}...HEAD -- "CHANGELOG.md"; then
+          # CHANGELOG not updated
+          if [ "${{ needs.pr-info.outputs.has-version-changes }}" = "true" ] || [ "${{ needs.pr-info.outputs.has-breaking-changes }}" = "true" ]; then
+            echo "❌ CHANGELOG.md should be updated for version changes or breaking changes" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Please update CHANGELOG.md to document your changes"
+            exit 1
+          else
+            echo "ℹ️ CHANGELOG.md not updated (acceptable for non-breaking changes)" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "✅ CHANGELOG.md has been updated" >> $GITHUB_STEP_SUMMARY
+          
+          # Show what was added to changelog
+          echo "### Changelog Changes" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- "CHANGELOG.md" | head -30 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+
+  documentation-check:
+    name: Documentation Completeness
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+    - name: Checkout PR  
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Check Documentation Updates
+      run: |
+        echo "### Documentation Check" >> $GITHUB_STEP_SUMMARY
+        
+        # Check if code changes require documentation updates
+        code_files_changed=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -E '\.(swift)$' | wc -l)
+        doc_files_changed=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -E '\.(md)$' | wc -l)
+        
+        echo "- Code files changed: $code_files_changed" >> $GITHUB_STEP_SUMMARY
+        echo "- Documentation files changed: $doc_files_changed" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for new public APIs that might need documentation
+        public_apis_added=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- '*.swift' | grep -E '^\+.*public ' | wc -l)
+        
+        if [ $public_apis_added -gt 0 ]; then
+          echo "- 🆕 New public APIs detected: $public_apis_added" >> $GITHUB_STEP_SUMMARY
+          echo "### New Public APIs" >> $GITHUB_STEP_SUMMARY
+          echo '```swift' >> $GITHUB_STEP_SUMMARY
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- '*.swift' | grep -E '^\+.*public ' | head -10 | sed 's/^\+//' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          if [ $doc_files_changed -eq 0 ]; then
+            echo "⚠️ Consider updating README.md or documentation for new public APIs" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::New public APIs detected. Consider updating documentation."
+          fi
+        fi
+        
+        # Check README.md for basic completeness if it was changed
+        if ! git diff --quiet origin/${{ github.event.pull_request.base.ref }}...HEAD -- "README.md"; then
+          echo "### README.md Changes" >> $GITHUB_STEP_SUMMARY
+          
+          # Basic README validation
+          required_sections=("Installation" "Usage" "Examples" "API")
+          missing_sections=()
+          
+          for section in "${required_sections[@]}"; do
+            if ! grep -qi "$section" README.md; then
+              missing_sections+=("$section")
+            fi
+          done
+          
+          if [ ${#missing_sections[@]} -gt 0 ]; then
+            echo "⚠️ README.md may be missing sections: ${missing_sections[*]}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ README.md appears complete with required sections" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+
+  security-check:
+    name: Basic Security Check  
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Security Pattern Analysis
+      run: |
+        echo "### Security Analysis" >> $GITHUB_STEP_SUMMARY
+        
+        # Look for potential security issues in changed files
+        security_issues=0
+        
+        # Check for hardcoded secrets/keys
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '(api_key|secret|password|token).*=.*["\'][^"\']{10,}["\']'; then
+          echo "❌ Potential hardcoded secrets detected" >> $GITHUB_STEP_SUMMARY
+          security_issues=$((security_issues + 1))
+        fi
+        
+        # Check for unsafe HTTP usage  
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -E 'http://.*\.anthropic\.com'; then
+          echo "❌ Insecure HTTP usage detected for Anthropic API" >> $GITHUB_STEP_SUMMARY
+          security_issues=$((security_issues + 1))
+        fi
+        
+        # Check for debug prints that might leak sensitive data
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '^\+.*print.*\b(key|token|auth|secret)\b'; then
+          echo "⚠️ Debug prints with potentially sensitive data detected" >> $GITHUB_STEP_SUMMARY
+          echo "::warning::Debug prints may contain sensitive information"
+        fi
+        
+        if [ $security_issues -eq 0 ]; then
+          echo "✅ No obvious security issues detected" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "::error::Security issues detected. Please review and fix."
+          exit 1
+        fi
+
+  # Summary job that all branch protection rules will check
+  pr-validation-complete:
+    name: PR Validation Complete
+    runs-on: ubuntu-latest
+    needs: [pr-info, changelog-validation, documentation-check, security-check]
+    if: always() && github.event.pull_request.draft == false
+    
+    steps:
+    - name: Check All Validation Results
+      run: |
+        echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ needs.pr-info.result }}" == "success" && \
+              "${{ needs.changelog-validation.result }}" == "success" && \
+              "${{ needs.documentation-check.result }}" == "success" && \
+              "${{ needs.security-check.result }}" == "success" ]]; then
+          echo "✅ All PR validation checks passed!" >> $GITHUB_STEP_SUMMARY
+          echo "This PR is ready for review and meets all quality gates." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Some PR validation checks failed:" >> $GITHUB_STEP_SUMMARY
+          echo "- PR Info: ${{ needs.pr-info.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Changelog: ${{ needs.changelog-validation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Documentation: ${{ needs.documentation-check.result }}" >> $GITHUB_STEP_SUMMARY  
+          echo "- Security: ${{ needs.security-check.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please address the failing checks before this PR can be merged." >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+    
+    - name: Comment on PR (if first run)
+      if: github.event.action == 'opened'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🤖 PR Validation Started
+
+            Thanks for your contribution! This PR is now being validated by our automated checks.
+
+            ### What's being checked:
+            - 🧪 **CI Tests**: Comprehensive test suite across multiple platforms
+            - 📝 **Documentation**: Completeness and consistency 
+            - 🔄 **Breaking Changes**: API compatibility analysis
+            - 📋 **Changelog**: Update requirements for significant changes
+            - 🔒 **Security**: Basic security pattern analysis
+
+            The validation will complete automatically. If any issues are found, they'll be reported here.
+
+            You can see detailed progress in the [Actions tab](https://github.com/${{ github.repository }}/actions).`
+          })

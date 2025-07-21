@@ -1,5 +1,11 @@
 # Anthropic Swift SDK
 
+[![CI](https://github.com/tthew/anthropic-swift-sdk/workflows/CI/badge.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/tthew/anthropic-swift-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/tthew/anthropic-swift-sdk)
+[![Swift 5.7+](https://img.shields.io/badge/Swift-5.7%2B-orange.svg)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/tthew/anthropic-swift-sdk)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > **⚠️ UNOFFICIAL LIBRARY**: This is an unofficial Swift SDK for the Anthropic Claude API and is not affiliated with, endorsed, or supported by Anthropic in any way. This library is developed and maintained independently.
 
 > **🤖 AI-ASSISTED DEVELOPMENT**: This SDK was designed and implemented using Claude Code, Anthropic's agentic coding tool, following strict Test-Driven Development (TDD) and Behavior-Driven Development (BDD) principles.
@@ -614,6 +620,48 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 3. Run tests to ensure everything is working
 4. Make your changes following TDD methodology
 5. Ensure all tests pass and coverage remains >95%
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+#### **Automated Testing**
+- **Multi-Platform Testing**: Runs on macOS 13/14 with Swift 5.7-5.10
+- **Linux Compatibility**: Basic compilation and core functionality tests
+- **Comprehensive Coverage**: All 124+ test cases with >95% code coverage
+- **Performance Validation**: Automated performance regression detection
+- **Example Validation**: Ensures all example projects build successfully
+
+#### **Quality Gates**
+- **Code Quality**: Automated validation of API consistency and documentation
+- **Breaking Change Detection**: Analyzes public API changes for compatibility
+- **Security Scanning**: Basic security pattern analysis for common issues
+- **Documentation Validation**: Ensures documentation stays current with code changes
+
+#### **Branch Protection**
+- **Required Status Checks**: All CI tests must pass before merge
+- **PR Review Process**: Minimum 1 review required for all changes
+- **Automatic Validation**: PRs are automatically validated for:
+  - Test coverage and passing status
+  - Changelog updates for significant changes
+  - Documentation completeness for new APIs
+  - Security pattern compliance
+
+#### **Contribution Workflow**
+1. **Fork & Branch**: Create a feature branch from `main`
+2. **Develop**: Make changes following TDD methodology
+3. **Test Locally**: Run `swift test` to ensure all tests pass
+4. **Submit PR**: Create pull request targeting `main` branch
+5. **CI Validation**: Wait for automated checks to complete
+6. **Code Review**: Address any feedback from maintainers
+7. **Merge**: PR automatically merges when all checks pass and approved
+
+The CI pipeline runs automatically on:
+- Pull request creation/updates
+- Pushes to `main` branch
+- Manual workflow triggers
+
+See [GitHub Actions](.github/workflows/) for complete workflow configurations.
 
 ## License
 

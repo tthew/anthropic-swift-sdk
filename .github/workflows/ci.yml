@@ -1,0 +1,263 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+      - '.gitignore'
+  workflow_dispatch:
+
+# Cancel in-progress workflows when new commits are pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: CI Tests (${{ matrix.os }}, Swift ${{ matrix.swift-version }})
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-13]
+        swift-version: ['5.7', '5.8', '5.9', '5.10']
+        # Exclude some combinations to reduce CI time while maintaining coverage
+        exclude:
+          - os: macos-13
+            swift-version: '5.8'
+          - os: macos-13
+            swift-version: '5.9'
+    
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: ${{ matrix.swift-version }}
+        
+    - name: Cache Swift Package Manager
+      uses: actions/cache@v4
+      with:
+        path: |
+          .build
+          ~/Library/Caches/org.swift.swiftpm
+        key: ${{ runner.os }}-swift-${{ matrix.swift-version }}-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-swift-${{ matrix.swift-version }}-
+          ${{ runner.os }}-swift-
+    
+    - name: Build Package
+      run: swift build -v
+      
+    - name: Build Examples
+      run: |
+        echo "Building example executables..."
+        swift build --target BasicChatExample
+        swift build --target ToolUseExample  
+        swift build --target BatchProcessingExample
+        swift build --target FileAnalysisExample
+    
+    - name: Run Tests
+      run: |
+        echo "Running comprehensive test suite..."
+        swift test --parallel --enable-code-coverage
+    
+    - name: Generate Code Coverage
+      if: matrix.os == 'macos-14' && matrix.swift-version == '5.10'
+      run: |
+        echo "Generating code coverage report..."
+        xcrun llvm-cov export \
+          .build/debug/AnthropicSDKPackageTests.xctest/Contents/MacOS/AnthropicSDKPackageTests \
+          -instr-profile .build/debug/codecov/default.profdata \
+          -format="lcov" > coverage.lcov
+    
+    - name: Upload Coverage to Codecov
+      if: matrix.os == 'macos-14' && matrix.swift-version == '5.10'
+      uses: codecov/codecov-action@v4
+      with:
+        file: coverage.lcov
+        flags: swift
+        name: codecov-${{ matrix.os }}-swift${{ matrix.swift-version }}
+        fail_ci_if_error: false
+    
+    - name: Validate Package Resolution
+      run: |
+        echo "Validating package resolution and dependencies..."
+        swift package resolve
+        swift package show-dependencies
+        
+    - name: Run Performance Smoke Test
+      # Only run performance tests on one configuration to avoid CI noise
+      if: matrix.os == 'macos-14' && matrix.swift-version == '5.10'
+      run: |
+        echo "Running performance smoke tests..."
+        # Filter out the intensive performance tests for CI, keeping essential ones
+        swift test --filter PerformanceTests.testConcurrentRequestHandling --parallel
+        swift test --filter PerformanceTests.testMessageProcessingPerformance --parallel
+    
+    - name: Verify SDK Version Consistency
+      run: |
+        echo "Verifying SDK version consistency across files..."
+        # Extract version from Version.swift
+        SDK_VERSION=$(grep -o '"[0-9]\+\.[0-9]\+\.[0-9]\+"' Sources/AnthropicSDK/Version.swift | tr -d '"')
+        echo "SDK Version: $SDK_VERSION"
+        
+        # Check if version appears in CHANGELOG.md
+        if ! grep -q "## \[$SDK_VERSION\]" CHANGELOG.md; then
+          echo "⚠️ Warning: Version $SDK_VERSION not found in CHANGELOG.md"
+        fi
+        
+        # Verify Package.swift syntax
+        swift package dump-package > /dev/null
+        echo "✅ Package.swift validation passed"
+
+  # Separate job for Linux compatibility testing (basic compilation check)
+  linux-compatibility:
+    name: Linux Compatibility Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: '5.10'
+    
+    - name: Test Linux Compilation
+      run: |
+        echo "Testing Linux compilation compatibility..."
+        swift build
+        echo "✅ Linux compilation successful"
+    
+    - name: Run Basic Tests on Linux
+      # Run only core functionality tests, excluding platform-specific ones
+      run: |
+        echo "Running basic tests on Linux..."
+        swift test --filter ClientInitializationTests
+        swift test --filter MessageTypesTests
+        swift test --filter HTTPClientTests
+        echo "✅ Basic Linux tests passed"
+
+  # Integration and validation checks
+  validation:
+    name: Code Quality & Validation
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: '5.10'
+    
+    - name: SwiftLint (if configured)
+      run: |
+        # Check if SwiftLint configuration exists
+        if [ -f ".swiftlint.yml" ]; then
+          echo "Running SwiftLint..."
+          if command -v swiftlint &> /dev/null; then
+            swiftlint lint --reporter github-actions-logging
+          else
+            echo "SwiftLint not installed, skipping..."
+          fi
+        else
+          echo "No SwiftLint configuration found, skipping..."
+        fi
+    
+    - name: API Compatibility Check
+      run: |
+        echo "Performing API compatibility validation..."
+        # Build and check that public API is accessible
+        swift build
+        
+        # Basic API smoke test - ensure main types can be imported and instantiated
+        cat > api_test.swift << 'EOF'
+        import AnthropicSDK
+        
+        // Test that main types are accessible
+        let _ = ClaudeModel.allCases
+        let _ = Usage(inputTokens: 10, outputTokens: 20)
+        
+        // Test that we can attempt client initialization (will fail without key, but API should be accessible)
+        do {
+          let _ = try AnthropicClient(apiKey: "test")
+        } catch {
+          // Expected to fail with invalid key, but API should be accessible
+          print("API accessibility test passed - \(error)")
+        }
+        
+        print("✅ API compatibility check passed")
+        EOF
+        
+        swift api_test.swift
+    
+    - name: Documentation Validation
+      run: |
+        echo "Validating documentation completeness..."
+        
+        # Check that key files exist and have minimum content
+        files=("README.md" "CHANGELOG.md" "CLAUDE.md" "CONTRIBUTING.md" "LICENSE")
+        for file in "${files[@]}"; do
+          if [ -f "$file" ]; then
+            lines=$(wc -l < "$file")
+            if [ $lines -gt 10 ]; then
+              echo "✅ $file: $lines lines"
+            else
+              echo "⚠️ $file: Only $lines lines - may need more content"
+            fi
+          else
+            echo "❌ Missing required file: $file"
+            exit 1
+          fi
+        done
+        
+        # Check README has basic sections
+        required_sections=("# " "## " "Installation" "Usage" "Examples")
+        for section in "${required_sections[@]}"; do
+          if grep -q "$section" README.md; then
+            echo "✅ README contains: $section"
+          else
+            echo "⚠️ README missing section: $section"
+          fi
+        done
+
+  # Final status check job
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [test, linux-compatibility, validation]
+    if: always()
+    
+    steps:
+    - name: Check All Jobs Status
+      run: |
+        if [[ "${{ needs.test.result }}" == "success" && \
+              "${{ needs.linux-compatibility.result }}" == "success" && \
+              "${{ needs.validation.result }}" == "success" ]]; then
+          echo "✅ All CI jobs completed successfully!"
+          exit 0
+        else
+          echo "❌ One or more CI jobs failed:"
+          echo "  Test: ${{ needs.test.result }}"
+          echo "  Linux Compatibility: ${{ needs.linux-compatibility.result }}"
+          echo "  Validation: ${{ needs.validation.result }}"
+          exit 1
+        fi

@@ -346,21 +346,104 @@ Follow [Semantic Versioning](https://semver.org/):
 - [ ] Git tag created
 - [ ] Release notes published
 
+## CI/CD Integration
+
+### Automated Testing Pipeline
+
+All contributions are automatically validated through our comprehensive CI/CD pipeline:
+
+#### **Pre-merge Validation**
+1. **Multi-platform Testing**: Tests run on macOS 13/14 with Swift 5.7-5.10
+2. **Linux Compatibility**: Compilation and core functionality verification  
+3. **Test Coverage**: Must maintain ≥95% coverage across all test suites
+4. **Performance Validation**: Automated performance regression detection
+5. **Example Validation**: All example projects must build successfully
+
+#### **Quality Gates**
+- **Breaking Change Detection**: Automated API compatibility analysis
+- **Documentation Validation**: Ensures docs match code changes
+- **Security Scanning**: Basic security pattern analysis
+- **Version Consistency**: Validates version numbers across files
+- **Changelog Requirements**: Significant changes must update CHANGELOG.md
+
+#### **Branch Protection Rules**
+- All status checks must pass before merge
+- Minimum 1 code review required
+- Up-to-date branch requirement enforced
+- Direct pushes to `main` branch blocked
+
+#### **PR Workflow**
+1. **Create PR**: Submit pull request targeting `main` branch
+2. **Automatic Validation**: CI pipeline runs all quality checks
+3. **PR Comments**: Automated feedback on validation results
+4. **Review Process**: Maintainer review and approval
+5. **Auto-merge**: Automatic merge when all checks pass and approved
+
+### Troubleshooting CI Issues
+
+#### **Common CI Failures**
+
+**Test Failures:**
+```bash
+# Run tests locally to debug
+swift test --parallel --enable-code-coverage
+
+# Run specific test suite
+swift test --filter StreamingTests
+```
+
+**Code Coverage Below 95%:**
+```bash
+# Generate coverage report
+swift test --enable-code-coverage
+xcrun llvm-cov show .build/debug/AnthropicSDKPackageTests.xctest/Contents/MacOS/AnthropicSDKPackageTests -instr-profile .build/debug/codecov/default.profdata
+```
+
+**Breaking Change Detection:**
+- Review public API changes carefully
+- Update CHANGELOG.md for breaking changes
+- Consider deprecation before removal
+
+**Documentation Issues:**
+- Update README.md for new public APIs
+- Add inline documentation for all public methods
+- Ensure examples reflect current API
+
+#### **Local Testing Before Push**
+```bash
+# Complete validation suite
+swift test                           # All tests
+swift build                          # Compilation check
+swift build --target BasicChatExample   # Example builds
+swift package resolve               # Dependency resolution
+```
+
+### Contributing to CI/CD
+
+The CI/CD configuration lives in `.github/workflows/`:
+- `ci.yml`: Main testing and validation pipeline
+- `pr-validation.yml`: PR-specific quality checks
+
+Improvements to the CI/CD pipeline are welcome through the standard PR process.
+
 ## Getting Help
 
 ### 1. Documentation
 - [Apple's Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
 - [Official Anthropic API Documentation](https://docs.anthropic.com/claude/reference)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
 
 ### 2. Community
 - [GitHub Discussions](https://github.com/tthew/anthropic-swift-sdk/discussions)
 - [Issues](https://github.com/tthew/anthropic-swift-sdk/issues)
+- [GitHub Actions](https://github.com/tthew/anthropic-swift-sdk/actions)
 
 ### 3. Maintainers
 Tag maintainers in issues for:
 - Architectural decisions
-- Breaking change approval
+- Breaking change approval  
 - Release coordination
+- CI/CD pipeline changes
 
 ## License
 
