@@ -1,6 +1,7 @@
 # Anthropic Swift SDK
 
 [![CI](https://github.com/tthew/anthropic-swift-sdk/workflows/CI/badge.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
+[![iOS Tests](https://img.shields.io/badge/iOS%20Tests-iOS%2015%2B%20Simulator-blue.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tthew/anthropic-swift-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/tthew/anthropic-swift-sdk)
 [![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/tthew/anthropic-swift-sdk)
@@ -467,8 +468,9 @@ func processStream(_ stream: MessageStream) async throws {
 
 ## Testing
 
-The SDK includes comprehensive test coverage:
+The SDK includes comprehensive test coverage across multiple platforms:
 
+### macOS Testing
 ```bash
 # Run all tests
 swift test
@@ -479,6 +481,28 @@ swift test --enable-code-coverage
 # Run specific test suite
 swift test --filter ClientInitializationTests
 ```
+
+### iOS Simulator Testing
+The CI pipeline automatically runs tests on iOS simulators for comprehensive platform coverage:
+
+```bash
+# Build for iOS Simulator (manual testing)
+xcodebuild build \
+  -scheme AnthropicSDK \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  CODE_SIGNING_ALLOWED='NO'
+
+# Run iOS tests (manual testing)
+xcodebuild test \
+  -scheme AnthropicSDK \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  CODE_SIGNING_ALLOWED='NO'
+```
+
+**Automated iOS Testing**: GitHub Actions runs the full test suite on:
+- iOS 15.0, 16.0, 17.0, and latest
+- iPhone 14 and iPhone 15 simulators  
+- All iOS-compatible SDK functionality
 
 ## Examples
 
@@ -627,6 +651,7 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 #### **Automated Testing**
 - **Multi-Platform Testing**: Runs on macOS 13/14 with Swift 5.9-5.10
+- **iOS Simulator Testing**: Complete test suite runs on iOS 15.0, 16.0, 17.0, and latest (iPhone 14/15 simulators)
 - **Linux Compatibility**: Basic compilation and core functionality tests
 - **Comprehensive Coverage**: All 124+ test cases with >95% code coverage
 - **Performance Validation**: Automated performance regression detection
