@@ -120,7 +120,7 @@ Tests/
 ## Platform Requirements
 
 - iOS 15+ / macOS 12+ (for modern async/await support)
-- Swift 5.7+
+- Swift 5.9+
 - Foundation framework only (zero external dependencies)
 
 ## Error Handling Strategy
