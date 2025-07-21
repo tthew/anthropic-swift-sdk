@@ -78,11 +78,21 @@ let stream = try await client.streamMessage("Write a story about space explorati
 
 for try await chunk in stream {
     switch chunk {
+    case .messageStart(let start):
+        print("Message started: \(start.message.id)")
     case .contentBlockStart:
-        print("Starting response...")
+        print("Content starting...")
     case .contentBlockDelta(let delta):
-        if case .textDelta(let text) = delta {
+        if case .textDelta(let text) = delta.delta {
             print(text, terminator: "")
+        }
+    case .messageDelta(let delta):
+        // Message metadata updates (usage, stop reason)
+        if let usage = delta.usage {
+            print("\n[Tokens: \(usage.outputTokens)]")
+        }
+        if let stopReason = delta.delta.stopReason {
+            print("\n[Stopped: \(stopReason)]")
         }
     case .messageStop:
         print("\nResponse complete!")
@@ -479,12 +489,20 @@ Check out the `Examples/` directory for complete sample applications:
 
 If you encounter streaming parsing errors with certain models (especially Claude 3.5 Haiku):
 
-#### Enhanced Error Handling (v1.1.2+)
-The SDK now includes improved streaming parser resilience:
+#### Enhanced Error Handling (v1.1.3+)
+The SDK now includes comprehensive streaming chunk support and improved parser resilience:
 
 ```swift
 for try await chunk in stream {
     switch chunk {
+    case .messageDelta(let delta):
+        // Handle message metadata updates (v1.1.3+)
+        if let usage = delta.usage {
+            print("Current tokens: \(usage.outputTokens)")
+        }
+        if let stopReason = delta.delta.stopReason {
+            print("Stop reason: \(stopReason)")
+        }
     case .error(let streamError):
         // StreamingErrorChunk now conforms to Error protocol
         print("Stream error: \(streamError.localizedDescription)")
@@ -572,7 +590,7 @@ Or update to specific version in `Package.swift`:
 #### Verify Latest Version
 Expected output with Claude 4 support:
 ```
-Anthropic Swift SDK v1.1.2
+Anthropic Swift SDK v1.1.3
 Commit: [latest]
 Claude 4 Support: ✅ Available
 
@@ -583,7 +601,7 @@ Available Models:
   [... other models]
 ```
 
-If you're still seeing older models only, ensure you're using **version 1.1.2 or later**.
+If you're still seeing older models only, ensure you're using **version 1.1.3 or later**.
 
 ## Contributing
 
