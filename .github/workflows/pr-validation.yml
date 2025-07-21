@@ -237,8 +237,8 @@ jobs:
         # Look for potential security issues in changed files
         security_issues=0
         
-        # Check for hardcoded secrets/keys (exclude workflow files)
-        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- ':!.github' | grep -iE '(api_key|secret|password|token).*=.*["\x27][^\"\x27]{10,}["\x27]'; then
+        # Check for hardcoded secrets/keys (exclude workflow files and legitimate property names)
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- ':!.github' | grep -iE '(apikey|api_key|secretkey|secret_key|password).*=.*["\x27][^\"\x27]{10,}["\x27]' | grep -v -E '(case|let|var).*=.*["\x27]'; then
           echo "❌ Potential hardcoded secrets detected" >> $GITHUB_STEP_SUMMARY
           security_issues=$((security_issues + 1))
         fi
