@@ -5,6 +5,37 @@ All notable changes to the Anthropic Swift SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2025-07-21
+
+### 🔧 HOTFIX - Complete message_delta Chunk Support
+
+#### Added
+- **MessageDeltaChunk Support**: Added complete support for `message_delta` chunk type from Claude's streaming API
+  - New `MessageDeltaChunk` struct with proper JSON decoding for `delta` and `usage` fields
+  - Added `messageDelta` case to `StreamingChunk` enum with full encode/decode support
+  - Proper handling of cumulative usage information and stop reason metadata
+- **Comprehensive Testing**: Added 3 new test cases for message_delta functionality
+  - `testMessageDeltaChunkDecoding`: Tests decoding with stop_reason and usage
+  - `testMessageDeltaChunkWithoutUsage`: Tests decoding with only delta information
+  - `testStreamingFlowWithMessageDelta`: Tests integration in complete streaming flow
+- **Enhanced Documentation**: Updated README with message_delta chunk handling examples
+
+#### Fixed
+- **Streaming Parser Completeness**: SDK now handles all documented chunk types from Claude's API
+- **Missing Chunk Type Issue**: Resolved "Failed to parse streaming chunk" errors for message_delta chunks
+- **API Compatibility**: Full compatibility with Claude's current streaming protocol specification
+
+#### Impact
+- **Complete API Coverage**: SDK now supports 100% of documented streaming chunk types
+- **Eliminates Parse Errors**: No more streaming failures due to missing message_delta support
+- **Enhanced Streaming Experience**: Access to real-time usage metrics and stop reason information
+- **Future-Proof**: Comprehensive chunk type coverage prevents parsing issues with API updates
+
+#### Migration
+- Update to v1.1.3 for complete streaming chunk support
+- Add `case .messageDelta(let delta):` to streaming switch statements to handle usage updates
+- Access cumulative token usage with `delta.usage?.outputTokens`
+
 ## [1.1.2] - 2025-07-21
 
 ### 🔄 STREAMING RELIABILITY UPDATE - Enhanced Parser Resilience

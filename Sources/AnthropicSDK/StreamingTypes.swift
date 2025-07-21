@@ -6,6 +6,7 @@ public enum StreamingChunk: Codable, Equatable {
     case contentBlockStart(ContentBlockStartChunk)
     case contentBlockDelta(ContentBlockDeltaChunk)
     case contentBlockStop(ContentBlockStopChunk)
+    case messageDelta(MessageDeltaChunk)
     case messageStop(MessageStopChunk)
     case ping
     case error(StreamingErrorChunk)
@@ -31,6 +32,9 @@ public enum StreamingChunk: Codable, Equatable {
         case "content_block_stop":
             let chunk = try ContentBlockStopChunk(from: decoder)
             self = .contentBlockStop(chunk)
+        case "message_delta":
+            let chunk = try MessageDeltaChunk(from: decoder)
+            self = .messageDelta(chunk)
         case "message_stop":
             let chunk = try MessageStopChunk(from: decoder)
             self = .messageStop(chunk)
@@ -61,6 +65,8 @@ public enum StreamingChunk: Codable, Equatable {
             try chunk.encode(to: encoder)
         case .contentBlockStop(let chunk):
             try chunk.encode(to: encoder)
+        case .messageDelta(let chunk):
+            try chunk.encode(to: encoder)
         case .messageStop(let chunk):
             try chunk.encode(to: encoder)
         case .ping:
@@ -78,6 +84,7 @@ public enum StreamingChunk: Codable, Equatable {
         case .contentBlockStart: return "content_block_start"
         case .contentBlockDelta: return "content_block_delta"
         case .contentBlockStop: return "content_block_stop"
+        case .messageDelta: return "message_delta"
         case .messageStop: return "message_stop"
         case .ping: return "ping"
         case .error: return "error"
@@ -156,6 +163,34 @@ public struct ContentBlockStopChunk: Codable, Equatable {
     public init(type: String = "content_block_stop", index: Int) {
         self.type = type
         self.index = index
+    }
+}
+
+/// Streaming chunk for message delta (updates to final Message object)
+public struct MessageDeltaChunk: Codable, Equatable {
+    public let type: String
+    public let delta: Delta
+    public let usage: Usage?
+    
+    public struct Delta: Codable, Equatable {
+        public let stopReason: String?
+        public let stopSequence: String?
+        
+        private enum CodingKeys: String, CodingKey {
+            case stopReason = "stop_reason"
+            case stopSequence = "stop_sequence"
+        }
+        
+        public init(stopReason: String? = nil, stopSequence: String? = nil) {
+            self.stopReason = stopReason
+            self.stopSequence = stopSequence
+        }
+    }
+    
+    public init(type: String = "message_delta", delta: Delta, usage: Usage? = nil) {
+        self.type = type
+        self.delta = delta
+        self.usage = usage
     }
 }
 

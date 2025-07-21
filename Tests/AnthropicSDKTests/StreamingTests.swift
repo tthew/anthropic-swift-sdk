@@ -157,4 +157,109 @@ final class StreamingTests: XCTestCase {
             XCTFail("Expected error chunk for unknown type")
         }
     }
+    
+    // BDD: GIVEN message_delta chunk WHEN decoded THEN proper MessageDeltaChunk is created
+    func testMessageDeltaChunkDecoding() throws {
+        // Test message_delta chunk with stop_reason and usage
+        let messageDeltaJSON = """
+        {
+            "type": "message_delta",
+            "delta": {
+                "stop_reason": "end_turn",
+                "stop_sequence": null
+            },
+            "usage": {
+                "input_tokens": 150,
+                "output_tokens": 25
+            }
+        }
+        """
+        
+        let data = messageDeltaJSON.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        
+        let chunk = try decoder.decode(StreamingChunk.self, from: data)
+        XCTAssertEqual(chunk.type, "message_delta")
+        
+        if case .messageDelta(let messageDelta) = chunk {
+            XCTAssertEqual(messageDelta.type, "message_delta")
+            XCTAssertEqual(messageDelta.delta.stopReason, "end_turn")
+            XCTAssertNil(messageDelta.delta.stopSequence)
+            XCTAssertNotNil(messageDelta.usage)
+            XCTAssertEqual(messageDelta.usage?.inputTokens, 150)
+            XCTAssertEqual(messageDelta.usage?.outputTokens, 25)
+        } else {
+            XCTFail("Expected messageDelta chunk")
+        }
+    }
+    
+    // BDD: GIVEN message_delta without usage WHEN decoded THEN proper MessageDeltaChunk is created
+    func testMessageDeltaChunkWithoutUsage() throws {
+        // Test message_delta chunk with only delta info
+        let messageDeltaJSON = """
+        {
+            "type": "message_delta",
+            "delta": {
+                "stop_reason": "tool_use",
+                "stop_sequence": "STOP"
+            }
+        }
+        """
+        
+        let data = messageDeltaJSON.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        
+        let chunk = try decoder.decode(StreamingChunk.self, from: data)
+        
+        if case .messageDelta(let messageDelta) = chunk {
+            XCTAssertEqual(messageDelta.delta.stopReason, "tool_use")
+            XCTAssertEqual(messageDelta.delta.stopSequence, "STOP")
+            XCTAssertNil(messageDelta.usage)
+        } else {
+            XCTFail("Expected messageDelta chunk")
+        }
+    }
+    
+    // BDD: GIVEN streaming flow with message_delta WHEN processing THEN proper event sequence is handled
+    func testStreamingFlowWithMessageDelta() throws {
+        // Test that message_delta fits properly in the streaming flow
+        let chunks: [StreamingChunk] = [
+            .messageStart(MessageStartChunk(message: MessageResponse(
+                id: "msg_123", type: "message", role: .assistant, content: [], 
+                model: "claude-opus-4-20250514", stopReason: nil, stopSequence: nil, 
+                usage: Usage(inputTokens: 10, outputTokens: 0)
+            ))),
+            .contentBlockStart(ContentBlockStartChunk(
+                index: 0, 
+                contentBlock: ContentBlockStartChunk.ContentBlock(type: "text", text: "")
+            )),
+            .contentBlockDelta(ContentBlockDeltaChunk(
+                index: 0,
+                delta: ContentBlockDeltaChunk.Delta(type: "text_delta", text: "Hello")
+            )),
+            .messageDelta(MessageDeltaChunk(
+                delta: MessageDeltaChunk.Delta(stopReason: "end_turn", stopSequence: nil),
+                usage: Usage(inputTokens: 10, outputTokens: 5)
+            )),
+            .contentBlockStop(ContentBlockStopChunk(index: 0)),
+            .messageStop(MessageStopChunk())
+        ]
+        
+        // Verify all chunks are properly handled
+        XCTAssertEqual(chunks.count, 6)
+        XCTAssertEqual(chunks[0].type, "message_start")
+        XCTAssertEqual(chunks[1].type, "content_block_start")
+        XCTAssertEqual(chunks[2].type, "content_block_delta")
+        XCTAssertEqual(chunks[3].type, "message_delta")
+        XCTAssertEqual(chunks[4].type, "content_block_stop")
+        XCTAssertEqual(chunks[5].type, "message_stop")
+        
+        // Test that message_delta chunk provides cumulative usage info
+        if case .messageDelta(let delta) = chunks[3] {
+            XCTAssertEqual(delta.usage?.outputTokens, 5)
+            XCTAssertEqual(delta.delta.stopReason, "end_turn")
+        } else {
+            XCTFail("Expected messageDelta chunk at index 3")
+        }
+    }
 }
