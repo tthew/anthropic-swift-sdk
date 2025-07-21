@@ -238,7 +238,7 @@ jobs:
         security_issues=0
         
         # Check for hardcoded secrets/keys
-        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '(api_key|secret|password|token).*=.*["\'][^"\']{10,}["\']'; then
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '(api_key|secret|password|token).*=.*["\x27][^\"\x27]{10,}["\x27]'; then
           echo "❌ Potential hardcoded secrets detected" >> $GITHUB_STEP_SUMMARY
           security_issues=$((security_issues + 1))
         fi
