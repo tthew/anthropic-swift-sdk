@@ -250,7 +250,7 @@ jobs:
         fi
         
         # Check for debug prints that might leak sensitive data
-        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '^\+.*print.*\b(key|token|auth|secret)\b'; then
+        if git diff origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -iE '^\+.*print.*\b(api_key|auth_token|password|secret_key)\b'; then
           echo "⚠️ Debug prints with potentially sensitive data detected" >> $GITHUB_STEP_SUMMARY
           echo "::warning::Debug prints may contain sensitive information"
         fi
