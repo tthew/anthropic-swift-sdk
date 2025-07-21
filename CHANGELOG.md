@@ -5,6 +5,31 @@ All notable changes to the Anthropic Swift SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-07-21
+
+### 🔄 STREAMING RELIABILITY UPDATE - Enhanced Parser Resilience
+
+#### Fixed
+- **Streaming Parser Errors**: Resolved critical parsing failures with Claude 3.5 Haiku and other models
+  - Fixed "Failed to parse streaming chunk" errors that forced fallback to non-streaming
+  - Enhanced SSE boundary detection for both Unix (\n\n) and Windows (\r\n\r\n) line endings
+  - Added graceful handling of unknown chunk types instead of crashing
+  - Improved error messages with raw data preview for debugging
+- **StreamingErrorChunk Error Conformance**: Now conforms to Swift's `Error` protocol for proper error handling
+- **Future-Proofing**: Unknown chunk types are converted to error chunks rather than throwing exceptions
+- **Enhanced Debugging**: Comprehensive error reporting with detailed decoding breakdowns
+
+#### Impact
+- **Streaming Reliability**: All Claude models now stream correctly without parser failures
+- **Better User Experience**: Eliminates forced fallbacks to slower non-streaming mode
+- **Developer Experience**: Proper Swift error handling and enhanced debugging capabilities
+- **Future Compatibility**: Graceful handling of new API features and chunk types
+
+#### Migration
+- Update to v1.1.2 for reliable streaming across all Claude models
+- `StreamingErrorChunk` now throwable - update error handling if needed
+- Enhanced error debugging available with detailed error messages
+
 ## [1.1.1] - 2025-07-21
 
 ### 🚨 CRITICAL HOTFIX - Model Identifier Correction

@@ -3,10 +3,10 @@ import Foundation
 /// Version information for the Anthropic Swift SDK
 public struct SDKVersion {
     /// The current version of the SDK
-    public static let current = "1.1.1"
+    public static let current = "1.1.2"
     
     /// The commit hash of this release
-    public static let commitHash = "867da3d"
+    public static let commitHash = "ea5aeaf"
     
     /// Release date
     public static let releaseDate = "2025-07-21"

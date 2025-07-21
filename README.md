@@ -479,7 +479,7 @@ Check out the `Examples/` directory for complete sample applications:
 
 If you encounter streaming parsing errors with certain models (especially Claude 3.5 Haiku):
 
-#### Enhanced Error Handling (v1.1.1+)
+#### Enhanced Error Handling (v1.1.2+)
 The SDK now includes improved streaming parser resilience:
 
 ```swift
@@ -566,13 +566,13 @@ In Xcode:
 
 Or update to specific version in `Package.swift`:
 ```swift
-.package(url: "https://github.com/tthew/anthropic-swift-sdk", from: "1.1.1")
+.package(url: "https://github.com/tthew/anthropic-swift-sdk", from: "1.1.2")
 ```
 
 #### Verify Latest Version
 Expected output with Claude 4 support:
 ```
-Anthropic Swift SDK v1.1.1
+Anthropic Swift SDK v1.1.2
 Commit: [latest]
 Claude 4 Support: ✅ Available
 
@@ -583,7 +583,7 @@ Available Models:
   [... other models]
 ```
 
-If you're still seeing older models only, ensure you're using **version 1.1.1 or later**.
+If you're still seeing older models only, ensure you're using **version 1.1.2 or later**.
 
 ## Contributing
 
