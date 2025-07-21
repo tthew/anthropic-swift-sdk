@@ -3,6 +3,27 @@ import Foundation
 import FoundationNetworking
 #endif
 
+// MARK: - Linux Compatibility Extension
+#if canImport(FoundationNetworking)
+extension URLSession {
+    /// Linux-compatible async wrapper for URLSession data tasks
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        return try await withCheckedThrowingContinuation { continuation in
+            let task = self.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let data = data, let response = response {
+                    continuation.resume(returning: (data, response))
+                } else {
+                    continuation.resume(throwing: HTTPError.invalidResponse)
+                }
+            }
+            task.resume()
+        }
+    }
+}
+#endif
+
 /// HTTP methods supported by the Anthropic API
 public enum HTTPMethod: String, Codable, CaseIterable, Equatable {
     case GET = "GET"
