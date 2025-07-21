@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/tthew/anthropic-swift-sdk/workflows/CI/badge.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tthew/anthropic-swift-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/tthew/anthropic-swift-sdk)
-[![Swift 5.7+](https://img.shields.io/badge/Swift-5.7%2B-orange.svg)](https://swift.org)
+[![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](https://github.com/tthew/anthropic-swift-sdk)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -28,7 +28,7 @@ A native Swift SDK for the Anthropic Claude API, designed for iOS and macOS appl
 ## Requirements
 
 - iOS 15.0+ / macOS 12.0+
-- Swift 5.7+
+- Swift 5.9+
 - Xcode 14.0+
 
 ## Installation
@@ -626,7 +626,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 This project uses GitHub Actions for continuous integration and deployment:
 
 #### **Automated Testing**
-- **Multi-Platform Testing**: Runs on macOS 13/14 with Swift 5.7-5.10
+- **Multi-Platform Testing**: Runs on macOS 13/14 with Swift 5.9-5.10
 - **Linux Compatibility**: Basic compilation and core functionality tests
 - **Comprehensive Coverage**: All 124+ test cases with >95% code coverage
 - **Performance Validation**: Automated performance regression detection

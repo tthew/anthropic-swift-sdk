@@ -200,7 +200,7 @@ Users experiencing issues should:
 - macOS 12.0+  
 - tvOS 15.0+
 - watchOS 8.0+
-- Swift 5.7+
+- Swift 5.9+
 
 ### API Coverage
 - ✅ Messages API (create, stream)

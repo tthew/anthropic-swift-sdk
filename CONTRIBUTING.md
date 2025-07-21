@@ -25,7 +25,7 @@ This project strictly follows **Test-Driven Development (TDD)** and **Behavior-D
 
 ### Prerequisites
 - Xcode 14.0+ 
-- Swift 5.7+
+- Swift 5.9+
 - iOS 15+ / macOS 12+ deployment targets
 
 ### Development Setup
@@ -353,7 +353,7 @@ Follow [Semantic Versioning](https://semver.org/):
 All contributions are automatically validated through our comprehensive CI/CD pipeline:
 
 #### **Pre-merge Validation**
-1. **Multi-platform Testing**: Tests run on macOS 13/14 with Swift 5.7-5.10
+1. **Multi-platform Testing**: Tests run on macOS 13/14 with Swift 5.9-5.10
 2. **Linux Compatibility**: Compilation and core functionality verification  
 3. **Test Coverage**: Must maintain ≥95% coverage across all test suites
 4. **Performance Validation**: Automated performance regression detection

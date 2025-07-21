@@ -29,13 +29,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-14, macos-13]
-        swift-version: ['5.7', '5.8', '5.9', '5.10']
-        # Exclude some combinations to reduce CI time while maintaining coverage
-        exclude:
-          - os: macos-13
-            swift-version: '5.8'
-          - os: macos-13
-            swift-version: '5.9'
+        swift-version: ['5.9', '5.10']
+        # Test on both recent macOS versions with Swift 5.9+ (minimum requirement)
+        # Swift 5.7-5.8 not supported due to Foundation/Dispatch API requirements
     
     env:
       DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
