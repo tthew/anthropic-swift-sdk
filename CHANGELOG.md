@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2024-06-21
 
+### CRITICAL FIXES APPLIED - Implementation Plan Compliance
+- **Fixed Missing ModelsResource**: Added complete models discovery and information API as required by Phase 2
+- **Added Models API**: Full model listing, retrieval, and recommendation functionality with `client.models` resource
+- **Enhanced Model Information**: ModelInfo type with context windows, vision capabilities, and descriptions
+- **Model Recommendations**: Intelligent model selection based on use case requirements (speed vs capability, vision support)
+- **Complete Test Coverage**: Added ModelsAPITests with comprehensive test scenarios following TDD principles
+
 ### Added - Phase 1: Foundation
 - **Client Initialization**: AnthropicClient with API key validation and environment variable support
 - **Core Networking**: HTTPClient actor with thread-safe operations and comprehensive error handling
@@ -61,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### API Coverage
 - ✅ Messages API (create, stream)
+- ✅ Models API (list, retrieve, capabilities, recommendations)
 - ✅ Batch Operations (create, retrieve, cancel, results, list)
 - ✅ File Operations (upload, retrieve, list, delete, download)
 - ✅ Tool Use (definition, execution, result handling)

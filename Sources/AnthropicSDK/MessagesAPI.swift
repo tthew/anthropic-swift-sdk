@@ -24,6 +24,8 @@ public struct CreateMessageRequest: Codable, Equatable {
     public let toolChoice: ToolChoice?
     /// Extended thinking mode for accessing reasoning steps
     public let thinkingMode: ThinkingMode?
+    /// File references for document analysis
+    public let files: [FileReference]?
     
     private enum CodingKeys: String, CodingKey {
         case model
@@ -37,6 +39,7 @@ public struct CreateMessageRequest: Codable, Equatable {
         case tools
         case toolChoice = "tool_choice"
         case thinkingMode = "thinking_mode"
+        case files
     }
     
     /// Creates a new message creation request
@@ -52,11 +55,12 @@ public struct CreateMessageRequest: Codable, Equatable {
     ///   - tools: Tools available for the assistant to use (optional)
     ///   - toolChoice: How the assistant should choose tools (optional)
     ///   - thinkingMode: Extended thinking mode for reasoning access (optional)
+    ///   - files: File references for document analysis (optional)
     public init(model: ClaudeModel, messages: [Message], maxTokens: Int, 
                 temperature: Double? = nil, topP: Double? = nil, topK: Int? = nil,
                 stopSequences: [String]? = nil, system: String? = nil,
                 tools: [Tool]? = nil, toolChoice: ToolChoice? = nil,
-                thinkingMode: ThinkingMode? = nil) {
+                thinkingMode: ThinkingMode? = nil, files: [FileReference]? = nil) {
         self.model = model
         self.messages = messages
         self.maxTokens = maxTokens
@@ -68,6 +72,7 @@ public struct CreateMessageRequest: Codable, Equatable {
         self.tools = tools
         self.toolChoice = toolChoice
         self.thinkingMode = thinkingMode
+        self.files = files
     }
     
     /// Validates the maxTokens parameter

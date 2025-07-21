@@ -90,6 +90,8 @@ public enum HTTPError: Error, LocalizedError {
 public actor HTTPClient {
     /// The URL session to use for requests
     private let session: URLSession
+    /// Client configuration
+    private let configuration: ClientConfiguration
     
     /// Creates a new HTTP client with default configuration
     public init() {
@@ -97,12 +99,30 @@ public actor HTTPClient {
         config.timeoutIntervalForRequest = 60.0
         config.timeoutIntervalForResource = 300.0
         self.session = URLSession(configuration: config)
+        self.configuration = .default
+    }
+    
+    /// Creates a new HTTP client with custom configuration
+    /// - Parameter configuration: Client configuration for performance optimization
+    public init(configuration: ClientConfiguration) {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = configuration.connectionTimeout
+        config.timeoutIntervalForResource = configuration.resourceTimeout
+        config.httpMaximumConnectionsPerHost = configuration.maxConcurrentRequests
+        
+        if configuration.enableCompression {
+            config.requestCachePolicy = configuration.enableCaching ? .returnCacheDataElseLoad : .reloadIgnoringLocalCacheData
+        }
+        
+        self.session = URLSession(configuration: config)
+        self.configuration = configuration
     }
     
     /// Creates a new HTTP client with custom URLSession
     /// - Parameter session: Custom URLSession to use
     public init(session: URLSession) {
         self.session = session
+        self.configuration = .default
     }
     
     /// Sends an HTTP request and returns the decoded response

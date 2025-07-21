@@ -38,10 +38,14 @@ public struct AnthropicClient {
     public let apiKey: String
     /// The base URL for API requests
     public let baseURL: URL
+    /// The client configuration
+    public let configuration: ClientConfiguration
     /// The HTTP client for making requests
     private let httpClient: HTTPClient
     /// Messages resource for message operations
     public let messages: MessagesResource
+    /// Models resource for model discovery and information
+    public let models: ModelsResource
     /// Batches resource for batch operations
     public let batches: BatchesResource
     /// Files resource for file operations
@@ -51,8 +55,9 @@ public struct AnthropicClient {
     /// - Parameters:
     ///   - apiKey: A valid Anthropic API key starting with "sk-ant-"
     ///   - baseURL: The base URL for API requests (optional, defaults to Anthropic API)
+    ///   - configuration: Client configuration for performance optimization (optional, defaults to .default)
     /// - Throws: `AnthropicError` if the API key is invalid or empty
-    public init(apiKey: String, baseURL: URL = URL(string: "https://api.anthropic.com")!) throws {
+    public init(apiKey: String, baseURL: URL = URL(string: "https://api.anthropic.com")!, configuration: ClientConfiguration = .default) throws {
         guard !apiKey.isEmpty else {
             throw AnthropicError.emptyAPIKey
         }
@@ -63,21 +68,25 @@ public struct AnthropicClient {
         
         self.apiKey = apiKey
         self.baseURL = baseURL
-        self.httpClient = HTTPClient()
+        self.configuration = configuration
+        self.httpClient = HTTPClient(configuration: configuration)
         self.messages = MessagesResource(httpClient: httpClient, apiKey: apiKey, baseURL: baseURL)
+        self.models = ModelsResource(httpClient: httpClient, apiKey: apiKey, baseURL: baseURL)
         self.batches = BatchesResource(httpClient: httpClient, apiKey: apiKey, baseURL: baseURL)
         self.files = FilesResource(httpClient: httpClient, apiKey: apiKey, baseURL: baseURL)
     }
     
     /// Creates a new client using the API key from the ANTHROPIC_API_KEY environment variable
-    /// - Parameter baseURL: The base URL for API requests (optional, defaults to Anthropic API)
+    /// - Parameters:
+    ///   - baseURL: The base URL for API requests (optional, defaults to Anthropic API)
+    ///   - configuration: Client configuration for performance optimization (optional, defaults to .default)
     /// - Throws: `AnthropicError` if no environment variable is set or the key is invalid
-    public init(baseURL: URL = URL(string: "https://api.anthropic.com")!) throws {
+    public init(baseURL: URL = URL(string: "https://api.anthropic.com")!, configuration: ClientConfiguration = .default) throws {
         guard let envAPIKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] else {
             throw AnthropicError.missingEnvironmentKey
         }
         
-        try self.init(apiKey: envAPIKey, baseURL: baseURL)
+        try self.init(apiKey: envAPIKey, baseURL: baseURL, configuration: configuration)
     }
     
     /// Convenience method to send a simple text message

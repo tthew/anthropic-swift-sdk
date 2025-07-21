@@ -137,6 +137,43 @@ let response = try await client.sendMessageWithTools(
 }
 ```
 
+### Model Discovery
+
+Discover available models and their capabilities:
+
+```swift
+// List all available models
+let modelList = try await client.models.list()
+for model in modelList.data {
+    print("Model: \(model.id)")
+    print("Context Window: \(model.contextWindow)")
+    print("Supports Vision: \(model.supportsVision)")
+    print("Description: \(model.description)")
+    print("---")
+}
+
+// Get information about a specific model
+let modelInfo = try await client.models.retrieve(.claude3_5Sonnet)
+print("Model: \(modelInfo.id)")
+print("Context Window: \(modelInfo.contextWindow) tokens")
+
+// Get all Claude models (offline)
+let allModels = await client.models.getAllClaudeModels()
+
+// Get model recommendations
+let fastModel = await client.models.recommendModel(
+    requiresVision: false,
+    preferSpeed: true
+)
+print("Recommended fast model: \(fastModel)")
+
+let visionModel = await client.models.recommendModel(
+    requiresVision: true,
+    preferSpeed: false
+)
+print("Recommended vision model: \(visionModel)")
+```
+
 ### Extended Thinking
 
 Access Claude's reasoning process:
