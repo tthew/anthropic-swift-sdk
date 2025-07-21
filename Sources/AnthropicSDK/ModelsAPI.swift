@@ -218,7 +218,7 @@ public actor ModelsResource {
             }
         }
         
-        return candidates.first ?? .claude3_5Sonnet
+        return candidates.first ?? .claude4Sonnet
     }
     
     /// Gets a speed score for model ranking (higher = faster)
@@ -226,9 +226,9 @@ public actor ModelsResource {
         switch model {
         case .claude3_5Haiku, .claude3Haiku:
             return 3
-        case .claude3_5Sonnet, .claude3Sonnet:
+        case .claude4Sonnet, .claude3_5Sonnet, .claude3Sonnet:
             return 2
-        case .claude3Opus:
+        case .claude4Opus, .claude3Opus:
             return 1
         }
     }
@@ -236,6 +236,10 @@ public actor ModelsResource {
     /// Gets a capability score for model ranking (higher = more capable)
     private func getModelCapability(_ model: ClaudeModel) -> Int {
         switch model {
+        case .claude4Opus:
+            return 5
+        case .claude4Sonnet:
+            return 4
         case .claude3Opus:
             return 3
         case .claude3_5Sonnet:
@@ -255,6 +259,10 @@ extension ClaudeModel {
     /// Human-readable description of the model's capabilities
     public var description: String {
         switch self {
+        case .claude4Opus:
+            return "World's best coding model with hybrid reasoning, delivering state-of-the-art performance on complex, long-running tasks and agentic workflows. 72.5% on SWE-bench."
+        case .claude4Sonnet:
+            return "Advanced model with hybrid reasoning modes, superior coding and precise instruction following. Successor to 3.5 Sonnet with balanced performance and cost."
         case .claude3_5Sonnet:
             return "Most intelligent model with best performance on complex tasks. Balanced speed and capability."
         case .claude3_5Haiku:

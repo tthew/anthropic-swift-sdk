@@ -84,6 +84,8 @@ final class ModelsAPITests: XCTestCase {
         
         // Verify each model type is represented
         let modelIds = allModels.map { $0.id }
+        XCTAssertTrue(modelIds.contains("claude-4-opus-20250522"))
+        XCTAssertTrue(modelIds.contains("claude-4-sonnet-20250522"))
         XCTAssertTrue(modelIds.contains("claude-3-5-sonnet-20241022"))
         XCTAssertTrue(modelIds.contains("claude-3-5-haiku-20241022"))
         XCTAssertTrue(modelIds.contains("claude-3-opus-20240229"))
@@ -101,8 +103,8 @@ final class ModelsAPITests: XCTestCase {
     func testRecommendModelForCapability() async throws {
         let capableModel = await client.models.recommendModel(requiresVision: false, preferSpeed: false)
         
-        // Should prefer Opus for capability, fallback to Sonnet
-        XCTAssertTrue(capableModel == .claude3Opus || capableModel == .claude3_5Sonnet)
+        // Should prefer Claude 4 Opus for capability, fallback to Claude 4 Sonnet
+        XCTAssertTrue(capableModel == .claude4Opus || capableModel == .claude4Sonnet)
     }
     
     func testRecommendModelWithVisionRequirement() async throws {

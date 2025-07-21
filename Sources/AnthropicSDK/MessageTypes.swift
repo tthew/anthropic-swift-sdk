@@ -164,6 +164,10 @@ public struct Message: Codable, Equatable {
 
 /// Available Claude models with their capabilities and context windows
 public enum ClaudeModel: String, CaseIterable, Codable, Equatable {
+    /// Claude 4 Opus - World's most intelligent model with hybrid reasoning for complex coding and agentic workflows
+    case claude4Opus = "claude-4-opus-20250522"
+    /// Claude 4 Sonnet - Advanced model with hybrid reasoning, superior coding and precise instruction following
+    case claude4Sonnet = "claude-4-sonnet-20250522"
     /// Claude 3.5 Sonnet - Fastest, most intelligent model for complex tasks
     case claude3_5Sonnet = "claude-3-5-sonnet-20241022"
     /// Claude 3.5 Haiku - Fast and lightweight for everyday tasks
@@ -178,6 +182,8 @@ public enum ClaudeModel: String, CaseIterable, Codable, Equatable {
     /// The maximum context window size for this model
     public var contextWindow: Int {
         switch self {
+        case .claude4Opus, .claude4Sonnet:
+            return 200_000
         case .claude3_5Sonnet, .claude3_5Haiku:
             return 200_000
         case .claude3Opus, .claude3Sonnet, .claude3Haiku:
@@ -188,6 +194,8 @@ public enum ClaudeModel: String, CaseIterable, Codable, Equatable {
     /// Whether this model supports vision (image input)
     public var supportsVision: Bool {
         switch self {
+        case .claude4Opus, .claude4Sonnet:
+            return true
         case .claude3_5Sonnet, .claude3Opus, .claude3Sonnet, .claude3Haiku:
             return true
         case .claude3_5Haiku:

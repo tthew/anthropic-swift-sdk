@@ -92,12 +92,12 @@ public struct AnthropicClient {
     /// Convenience method to send a simple text message
     /// - Parameters:
     ///   - text: The text message to send
-    ///   - model: The Claude model to use (defaults to Claude 3.5 Sonnet)
+    ///   - model: The Claude model to use (defaults to Claude 4 Sonnet)
     ///   - maxTokens: Maximum tokens to generate (defaults to 1000)
     /// - Returns: The message response from the API
     /// - Throws: HTTPError or decoding errors
     public func sendMessage(_ text: String, 
-                           model: ClaudeModel = .claude3_5Sonnet, 
+                           model: ClaudeModel = .claude4Sonnet, 
                            maxTokens: Int = 1000) async throws -> MessageResponse {
         return try await messages.create(
             model: model,
@@ -109,12 +109,12 @@ public struct AnthropicClient {
     /// Convenience method to stream a simple text message
     /// - Parameters:
     ///   - text: The text message to send
-    ///   - model: The Claude model to use (defaults to Claude 3.5 Sonnet)
+    ///   - model: The Claude model to use (defaults to Claude 4 Sonnet)
     ///   - maxTokens: Maximum tokens to generate (defaults to 1000)
     /// - Returns: An AsyncSequence of streaming chunks for real-time response processing
     /// - Throws: HTTPError or decoding errors
     public func streamMessage(_ text: String, 
-                             model: ClaudeModel = .claude3_5Sonnet, 
+                             model: ClaudeModel = .claude4Sonnet, 
                              maxTokens: Int = 1000) async throws -> MessageStream {
         return try await messages.stream(
             model: model,
@@ -136,7 +136,7 @@ public struct AnthropicClient {
         _ text: String,
         tools: [Tool],
         toolHandler: ToolHandler,
-        model: ClaudeModel = .claude3_5Sonnet,
+        model: ClaudeModel = .claude4Sonnet,
         maxTokens: Int = 1000
     ) async throws -> MessageResponse {
         var conversationMessages: [Message] = [.user(text)]
@@ -218,7 +218,7 @@ public struct AnthropicClient {
     public func sendMessageWithThinking(
         _ text: String,
         thinkingMode: ThinkingMode = .extended,
-        model: ClaudeModel = .claude3_5Sonnet,
+        model: ClaudeModel = .claude4Sonnet,
         maxTokens: Int = 1000
     ) async throws -> ExtendedMessageResponse {
         let request = CreateMessageRequest(

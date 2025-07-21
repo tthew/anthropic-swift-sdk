@@ -66,7 +66,7 @@ print(response.content.first?.text ?? "No response")
 // With specific model and parameters
 let response = try await client.sendMessage(
     "Explain quantum computing",
-    model: .claude3_5Sonnet,
+    model: .claude4Sonnet,
     maxTokens: 1000
 )
 ```
@@ -153,7 +153,7 @@ for model in modelList.data {
 }
 
 // Get information about a specific model
-let modelInfo = try await client.models.retrieve(.claude3_5Sonnet)
+let modelInfo = try await client.models.retrieve(.claude4Sonnet)
 print("Model: \(modelInfo.id)")
 print("Context Window: \(modelInfo.contextWindow) tokens")
 

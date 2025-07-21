@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Model Recommendations**: Intelligent model selection based on use case requirements (speed vs capability, vision support)
 - **Complete Test Coverage**: Added ModelsAPITests with comprehensive test scenarios following TDD principles
 
+### MAJOR UPDATE - Claude 4 Support Added
+- **Claude 4 Opus**: World's best coding model with hybrid reasoning (72.5% SWE-bench score)
+- **Claude 4 Sonnet**: Advanced hybrid reasoning model, successor to Claude 3.5 Sonnet
+- **Hybrid Reasoning**: Both models support near-instant responses and extended thinking modes
+- **Updated Defaults**: All convenience methods now default to Claude 4 Sonnet for best performance
+- **Model Recommendations**: Updated to prioritize Claude 4 models for capability-focused use cases
+- **Complete Integration**: All SDK features work seamlessly with Claude 4 models
+
 ### Added - Phase 1: Foundation
 - **Client Initialization**: AnthropicClient with API key validation and environment variable support
 - **Core Networking**: HTTPClient actor with thread-safe operations and comprehensive error handling
