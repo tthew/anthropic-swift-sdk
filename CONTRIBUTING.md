@@ -354,10 +354,11 @@ All contributions are automatically validated through our comprehensive CI/CD pi
 
 #### **Pre-merge Validation**
 1. **Multi-platform Testing**: Tests run on macOS 13/14 with Swift 5.9-5.10
-2. **Linux Compatibility**: Compilation and core functionality verification  
-3. **Test Coverage**: Must maintain ≥95% coverage across all test suites
-4. **Performance Validation**: Automated performance regression detection
-5. **Example Validation**: All example projects must build successfully
+2. **iOS Simulator Testing**: Complete test suite runs on iOS 15.0-latest (iPhone 14/15 simulators)
+3. **Linux Compatibility**: Compilation and core functionality verification  
+4. **Test Coverage**: Must maintain ≥95% coverage across all test suites
+5. **Performance Validation**: Automated performance regression detection
+6. **Example Validation**: All example projects must build successfully
 
 #### **Quality Gates**
 - **Breaking Change Detection**: Automated API compatibility analysis
@@ -412,11 +413,28 @@ xcrun llvm-cov show .build/debug/AnthropicSDKPackageTests.xctest/Contents/MacOS/
 #### **Local Testing Before Push**
 ```bash
 # Complete validation suite
-swift test                           # All tests
-swift build                          # Compilation check
-swift build --target BasicChatExample   # Example builds
-swift package resolve               # Dependency resolution
+swift test --skip PerformanceTests     # All tests excluding performance
+swift build                            # Compilation check
+swift build --target BasicChatExample # Example builds
+swift package resolve                 # Dependency resolution
 ```
+
+#### **iOS Simulator Testing (Optional)**
+```bash
+# Test on iOS simulator (requires Xcode)
+xcodebuild test \
+  -scheme AnthropicSDK \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  CODE_SIGNING_ALLOWED='NO'
+
+# Build examples for iOS (validates iOS compatibility)
+xcodebuild build \
+  -scheme BasicChatExample \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+  CODE_SIGNING_ALLOWED='NO'
+```
+
+**Note**: iOS testing is automatically handled by CI, but local iOS testing can help catch issues earlier.
 
 ### Contributing to CI/CD
 

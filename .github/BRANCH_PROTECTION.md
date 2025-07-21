@@ -29,17 +29,21 @@ main
 **Required Status Checks:**
 Add these exact check names (they will appear after first CI run):
 ```
-CI Tests (macos-14, 5.7)
-CI Tests (macos-14, 5.8)  
 CI Tests (macos-14, 5.9)
 CI Tests (macos-14, 5.10)
-CI Tests (macos-13, 5.7)
+CI Tests (macos-13, 5.9)
 CI Tests (macos-13, 5.10)
+iOS Tests (iPhone 14, iOS 15.0)
+iOS Tests (iPhone 14, iOS 16.0)
+iOS Tests (iPhone 15, iOS 17.0)
+iOS Tests (iPhone 15, iOS latest)
 Linux Compatibility Check
 Code Quality & Validation
 CI Success
 PR Validation Complete
 ```
+
+**Note**: The iOS testing checks ensure comprehensive cross-platform compatibility by running the full test suite on multiple iOS simulator configurations (iOS 15.0-latest on iPhone 14/15 simulators).
 
 **✅ Require conversation resolution before merging**
 
