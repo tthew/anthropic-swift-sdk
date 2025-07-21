@@ -411,12 +411,35 @@ func sendWithRetry(_ message: String, maxAttempts: Int = 3) async throws -> Mess
 
 ### 3. Streaming Best Practices
 ```swift
-// Handle streaming with proper error recovery
+// Handle streaming with proper error recovery and parsing resilience
 func processStream(_ stream: MessageStream) async throws {
     do {
         for try await chunk in stream {
-            // Process chunk
-            await processChunk(chunk)
+            switch chunk {
+            case .contentBlockDelta(let delta):
+                // Process text content
+                if case .textDelta(let text) = delta {
+                    print(text, terminator: "")
+                }
+            case .error(let streamError):
+                // Handle streaming errors gracefully
+                print("Stream error: \(streamError.localizedDescription)")
+                if streamError.error.type == "parsing_error" {
+                    // Log detailed error for debugging
+                    print("Parsing error details: \(streamError.error.message)")
+                    // Continue processing other chunks
+                    continue
+                } else {
+                    // Handle other error types as needed
+                    break
+                }
+            case .messageStop:
+                print("\nStream complete!")
+                break
+            default:
+                // Handle other chunk types
+                break
+            }
         }
     } catch {
         // Handle stream interruption
@@ -451,6 +474,61 @@ Check out the `Examples/` directory for complete sample applications:
 - **FileAnalyzer**: Document upload and analysis
 
 ## Troubleshooting
+
+### Streaming Parsing Errors
+
+If you encounter streaming parsing errors with certain models (especially Claude 3.5 Haiku):
+
+#### Enhanced Error Handling (v1.1.1+)
+The SDK now includes improved streaming parser resilience:
+
+```swift
+for try await chunk in stream {
+    switch chunk {
+    case .error(let streamError):
+        // StreamingErrorChunk now conforms to Error protocol
+        print("Stream error: \(streamError.localizedDescription)")
+        
+        switch streamError.error.type {
+        case "parsing_error":
+            // Enhanced parsing error with detailed debugging info
+            print("Raw data causing issue: \(streamError.error.message)")
+            // You can choose to continue or fallback to non-streaming
+            continue
+        case "unknown_chunk_type":
+            // New chunk types from API updates
+            print("Unknown chunk type - may need SDK update")
+            continue
+        default:
+            // Handle other streaming errors
+            break
+        }
+    default:
+        // Process normal chunks
+        break
+    }
+}
+```
+
+#### Fallback Strategy
+```swift
+// Implement automatic fallback for parsing errors
+do {
+    let stream = try await client.streamMessage("Your prompt", model: .claude3_5Haiku)
+    for try await chunk in stream {
+        if case .error(let streamError) = chunk,
+           streamError.error.type == "parsing_error" {
+            // Fallback to non-streaming for this model
+            throw StreamingFallbackError()
+        }
+        // Process successful chunks...
+    }
+} catch {
+    // Use non-streaming as fallback
+    let response = try await client.sendMessage("Your prompt", model: .claude3_5Haiku)
+    print(response.content.first?.text ?? "")
+}
+```
 
 ### Claude 4 Models Not Available
 

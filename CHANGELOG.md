@@ -14,19 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ❌ **Before**: `"claude-4-opus-20250522"` and `"claude-4-sonnet-20250522"` (causing 404 errors)
   - ✅ **After**: `"claude-opus-4-20250514"` and `"claude-sonnet-4-20250514"` (official API identifiers)
 - **HTTP 404 Resolution**: Fixed all API calls to Claude 4 models that were previously failing
-- **Test Suite Updates**: Updated all tests to expect correct model identifiers
-- **Documentation Updates**: Updated README with correct model identifiers and version references
+- **Streaming Parser Resilience**: Enhanced streaming chunk parser to handle model-specific formats
+  - Fixed parsing errors with Claude 3.5 Haiku and other models
+  - Added graceful handling of unknown chunk types instead of crashing
+  - Improved SSE boundary detection for both Unix (\n\n) and Windows (\r\n\r\n) line endings
+  - Enhanced error messages with raw data preview for debugging
+- **StreamingErrorChunk Error Conformance**: `StreamingErrorChunk` now conforms to Swift's `Error` protocol
+- **Test Suite Updates**: Updated all tests to expect correct model identifiers and added streaming parser tests
+- **Documentation Updates**: Updated README with correct model identifiers, streaming troubleshooting, and fallback strategies
 
 #### Impact
 - **Breaking Issue Resolved**: All Claude 4 functionality now works correctly
+- **Streaming Reliability**: Claude 3.5 Haiku and other models now stream correctly without parsing errors
 - **API Compatibility**: SDK now matches official Anthropic API model identifiers
+- **Better Error Handling**: Streaming errors are now properly typed and debuggable
 - **Version Tracking**: Added comprehensive hotfix tracking in Version.swift
 
 #### Migration
-Users experiencing 404 errors with Claude 4 models should:
-1. Update to version 1.1.1
-2. Clear Swift Package Manager cache
-3. Verify Claude 4 models are now accessible
+Users experiencing issues should:
+1. **For Claude 4 404 errors**: Update to version 1.1.1 and clear Swift Package Manager cache
+2. **For streaming parsing errors**: Update to v1.1.1 for enhanced error handling and parser resilience
+3. **Error handling updates**: `StreamingErrorChunk` now conforms to `Error` protocol - update catch blocks if needed
+4. Verify fixes with `SDKVersion.printVersion()` to confirm v1.1.1 installation
 
 ## [1.0.0] - 2024-06-21
 

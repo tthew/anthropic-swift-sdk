@@ -14,6 +14,7 @@ public struct SDKVersion {
     /// Major features in this version
     public static let features = [
         "CRITICAL FIX: Corrected Claude 4 Model Identifiers",
+        "MAJOR FIX: Enhanced Streaming Parser Resilience",
         "Claude 4 Opus & Sonnet Models", 
         "Hybrid Reasoning Support",
         "Complete Models Discovery API",

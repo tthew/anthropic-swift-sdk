@@ -122,4 +122,39 @@ final class StreamingTests: XCTestCase {
         // This will become a proper connection handling test
         // testing cancellation, timeout, and graceful termination
     }
+    
+    // BDD: GIVEN malformed streaming chunk WHEN parsed THEN error chunk is created instead of crashing
+    func testStreamingParserResilience() throws {
+        // Test that StreamingErrorChunk conforms to Error protocol
+        let errorChunk = StreamingErrorChunk(
+            error: StreamingErrorChunk.ErrorDetail(
+                type: "parsing_error",
+                message: "Test error"
+            )
+        )
+        
+        XCTAssertTrue(errorChunk is Error)
+        XCTAssertEqual(errorChunk.localizedDescription, "parsing_error: Test error")
+        
+        // Test unknown chunk type handling
+        let unknownChunkJSON = """
+        {
+            "type": "unknown_new_chunk_type",
+            "data": "some data"
+        }
+        """
+        
+        let data = unknownChunkJSON.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        
+        // This should not throw but create an error chunk
+        let chunk = try decoder.decode(StreamingChunk.self, from: data)
+        
+        if case .error(let errorChunk) = chunk {
+            XCTAssertEqual(errorChunk.error.type, "unknown_chunk_type")
+            XCTAssertTrue(errorChunk.error.message.contains("unknown_new_chunk_type"))
+        } else {
+            XCTFail("Expected error chunk for unknown type")
+        }
+    }
 }

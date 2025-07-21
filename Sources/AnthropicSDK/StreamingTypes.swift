@@ -40,7 +40,14 @@ public enum StreamingChunk: Codable, Equatable {
             let chunk = try StreamingErrorChunk(from: decoder)
             self = .error(chunk)
         default:
-            throw DecodingError.dataCorruptedError(forKey: .type, in: container, debugDescription: "Unknown streaming chunk type: \(type)")
+            // Instead of throwing, create an error chunk for unknown types
+            let errorChunk = StreamingErrorChunk(
+                error: StreamingErrorChunk.ErrorDetail(
+                    type: "unknown_chunk_type",
+                    message: "Received unknown streaming chunk type: '\(type)'. This may indicate a new API feature or model-specific behavior."
+                )
+            )
+            self = .error(errorChunk)
         }
     }
     
@@ -162,7 +169,7 @@ public struct MessageStopChunk: Codable, Equatable {
 }
 
 /// Streaming chunk for error events
-public struct StreamingErrorChunk: Codable, Equatable {
+public struct StreamingErrorChunk: Codable, Equatable, Error {
     public let type: String
     public let error: ErrorDetail
     
@@ -179,6 +186,16 @@ public struct StreamingErrorChunk: Codable, Equatable {
     public init(type: String = "error", error: ErrorDetail) {
         self.type = type
         self.error = error
+    }
+    
+    /// Convert to localized description for Error conformance
+    public var errorDescription: String? {
+        return "\(error.type): \(error.message)"
+    }
+    
+    /// Convert to a string representation
+    public var localizedDescription: String {
+        return errorDescription ?? "Unknown streaming error"
     }
 }
 
@@ -279,7 +296,14 @@ private class StreamingTaskDelegate: NSObject, URLSessionDataDelegate {
         // Process complete Server-Sent Events from buffer
         while let eventData = extractNextSSEEvent() {
             if let chunk = parseSSEEvent(eventData) {
-                continuation.yield(chunk)
+                // Handle error chunks specially - they can be yielded or thrown
+                if case .error(_) = chunk {
+                    // For parsing errors, we yield them to allow graceful handling
+                    // For critical errors, we might want to throw
+                    continuation.yield(chunk)
+                } else {
+                    continuation.yield(chunk)
+                }
             }
         }
     }
@@ -294,9 +318,19 @@ private class StreamingTaskDelegate: NSObject, URLSessionDataDelegate {
     
     private func extractNextSSEEvent() -> Data? {
         // Look for double newline which indicates end of SSE event
-        let delimiter = "\n\n".data(using: .utf8)!
+        // Handle both \n\n and \r\n\r\n patterns
+        let delimiterLF = "\n\n".data(using: .utf8)!
+        let delimiterCRLF = "\r\n\r\n".data(using: .utf8)!
         
-        if let range = buffer.range(of: delimiter) {
+        // Check for \r\n\r\n first (Windows-style)
+        if let range = buffer.range(of: delimiterCRLF) {
+            let eventData = buffer.subdata(in: 0..<range.lowerBound)
+            buffer.removeSubrange(0..<range.upperBound)
+            return eventData
+        }
+        
+        // Check for \n\n (Unix-style)
+        if let range = buffer.range(of: delimiterLF) {
             let eventData = buffer.subdata(in: 0..<range.lowerBound)
             buffer.removeSubrange(0..<range.upperBound)
             return eventData
@@ -307,14 +341,21 @@ private class StreamingTaskDelegate: NSObject, URLSessionDataDelegate {
     
     private func parseSSEEvent(_ eventData: Data) -> StreamingChunk? {
         guard let eventString = String(data: eventData, encoding: .utf8) else {
-            return nil
+            // Create error chunk for invalid UTF-8 encoding
+            let errorChunk = StreamingErrorChunk(
+                error: StreamingErrorChunk.ErrorDetail(
+                    type: "encoding_error",
+                    message: "SSE event data contains invalid UTF-8 encoding"
+                )
+            )
+            return .error(errorChunk)
         }
         
-        let lines = eventString.components(separatedBy: .newlines)
+        let lines = eventString.components(separatedBy: .newlines).filter { !$0.isEmpty }
         var dataLines: [String] = []
         var eventType: String?
         
-        for line in lines {
+        for line in lines.filter({ !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
             if line.hasPrefix("data: ") {
                 let dataContent = String(line.dropFirst(6)) // Remove "data: "
                 dataLines.append(dataContent)
@@ -325,27 +366,66 @@ private class StreamingTaskDelegate: NSObject, URLSessionDataDelegate {
         }
         
         guard !dataLines.isEmpty else {
+            // This is normal for ping events or empty chunks
             return nil
         }
         
         // Combine all data lines
-        let jsonData = dataLines.joined(separator: "\n").data(using: .utf8)!
+        let combinedData = dataLines.joined(separator: "\n")
         
         // Handle special event types
-        if eventType == "ping" {
+        if eventType == "ping" || combinedData.trimmingCharacters(in: .whitespaces).isEmpty {
             return .ping
         }
         
-        // Parse JSON data to StreamingChunk
+        guard let jsonData = combinedData.data(using: .utf8) else {
+            let errorChunk = StreamingErrorChunk(
+                error: StreamingErrorChunk.ErrorDetail(
+                    type: "encoding_error",
+                    message: "Failed to convert combined data to UTF-8"
+                )
+            )
+            return .error(errorChunk)
+        }
+        
+        // Parse JSON data to StreamingChunk with enhanced error handling
         do {
             let chunk = try decoder.decode(StreamingChunk.self, from: jsonData)
             return chunk
-        } catch {
-            // Return error chunk for parsing failures
+        } catch let decodingError as DecodingError {
+            // Enhanced error reporting for debugging
+            var errorMessage = "Failed to parse streaming chunk: "
+            
+            switch decodingError {
+            case .dataCorrupted(let context):
+                errorMessage += "Data corrupted at \(context.codingPath.map(\.stringValue).joined(separator: ".")): \(context.debugDescription)"
+            case .keyNotFound(let key, let context):
+                errorMessage += "Missing key '\(key.stringValue)' at \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+            case .typeMismatch(let type, let context):
+                errorMessage += "Type mismatch for \(type) at \(context.codingPath.map(\.stringValue).joined(separator: ".")): \(context.debugDescription)"
+            case .valueNotFound(let type, let context):
+                errorMessage += "Value not found for \(type) at \(context.codingPath.map(\.stringValue).joined(separator: "."))"
+            @unknown default:
+                errorMessage += decodingError.localizedDescription
+            }
+            
+            // Include raw data for debugging (truncated to avoid huge logs)
+            let rawDataPreview = String(combinedData.prefix(200))
+            errorMessage += " | Raw data preview: \(rawDataPreview)"
+            
             let errorChunk = StreamingErrorChunk(
                 error: StreamingErrorChunk.ErrorDetail(
                     type: "parsing_error",
-                    message: "Failed to parse streaming chunk: \(error.localizedDescription)"
+                    message: errorMessage
+                )
+            )
+            return .error(errorChunk)
+        } catch {
+            // Generic error fallback
+            let errorChunk = StreamingErrorChunk(
+                error: StreamingErrorChunk.ErrorDetail(
+                    type: "parsing_error",
+                    message: "Failed to parse streaming chunk: \(error.localizedDescription) | Raw data: \(String(combinedData.prefix(200)))"
                 )
             )
             return .error(errorChunk)
