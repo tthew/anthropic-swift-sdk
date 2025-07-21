@@ -18,3 +18,16 @@ xcuserdata/
 # macOS
 .DS_Store
 .env
+
+# API Keys and Configuration Files
+.mcp.json
+*_credentials.json
+secrets.*
+.secrets
+*.key
+*.pem
+
+# Environment and Config Files with Potential Secrets
+.env.*
+config.json
+settings.json
