@@ -448,6 +448,63 @@ Check out the `Examples/` directory for complete sample applications:
 - **BatchProcessor**: Bulk processing demonstration
 - **FileAnalyzer**: Document upload and analysis
 
+## Troubleshooting
+
+### Claude 4 Models Not Available
+
+If Claude 4 models (`.claude4Opus`, `.claude4Sonnet`) are not available after updating:
+
+#### Check Your SDK Version
+```swift
+import AnthropicSDK
+
+// Print version information
+SDKVersion.printVersion()
+
+// Quick check for Claude 4 support
+print("Claude 4 Support: \(SDKVersion.hasClaude4Support)")
+```
+
+#### Clear Swift Package Manager Cache
+```bash
+# Option 1: Delete derived data
+rm -rf ~/Library/Developer/Xcode/DerivedData
+
+# Option 2: Clear SPM cache
+swift package reset
+swift package clean
+
+# Option 3: Force package resolution (in your project)
+swift package resolve --force-resolved-versions
+```
+
+#### Update Package Dependency
+In Xcode:
+1. File → Package Dependencies
+2. Select "anthropic-swift-sdk" 
+3. Right-click → Update Package
+
+Or update to specific version in `Package.swift`:
+```swift
+.package(url: "https://github.com/tthew/anthropic-swift-sdk", from: "1.1.0")
+```
+
+#### Verify Latest Version
+Expected output with Claude 4 support:
+```
+Anthropic Swift SDK v1.1.0
+Commit: 2ff33ea
+Claude 4 Support: ✅ Available
+
+Available Models:
+  - claude-4-opus-20250522
+  - claude-4-sonnet-20250522
+  - claude-3-5-sonnet-20241022
+  [... other models]
+```
+
+If you're still seeing older models only, ensure you're using **version 1.1.0 or later**.
+
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
