@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Represents different types of streaming chunks from the Anthropic API
 public enum StreamingChunk: Codable, Equatable {

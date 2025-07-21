@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// HTTP methods supported by the Anthropic API
 public enum HTTPMethod: String, Codable, CaseIterable, Equatable {
