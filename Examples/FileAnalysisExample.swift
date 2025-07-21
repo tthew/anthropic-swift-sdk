@@ -78,7 +78,7 @@ struct FileAnalysisExample {
             }
             
             print("\n💰 Token Usage:")
-            print("   Input: \(analysisResponse.usage.inputTokens)")
+            print("   Input: \(analysisResponse.usage.inputTokens ?? 0)")
             print("   Output: \(analysisResponse.usage.outputTokens)")
             
             // Clean up: delete the uploaded file
