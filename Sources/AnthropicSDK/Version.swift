@@ -3,16 +3,17 @@ import Foundation
 /// Version information for the Anthropic Swift SDK
 public struct SDKVersion {
     /// The current version of the SDK
-    public static let current = "1.1.3"
+    public static let current = "1.1.4"
     
     /// The commit hash of this release
-    public static let commitHash = "a0d7078"
+    public static let commitHash = "92c04a9"
     
     /// Release date
     public static let releaseDate = "2025-07-21"
     
     /// Major features in this version
     public static let features = [
+        "CRITICAL FIX: Usage struct inputTokens parsing for message_delta",
         "HOTFIX: Complete message_delta chunk support",
         "CRITICAL FIX: Corrected Claude 4 Model Identifiers",
         "MAJOR FIX: Enhanced Streaming Parser Resilience",
