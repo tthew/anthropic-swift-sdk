@@ -1,0 +1,51 @@
+# GitHub Pages configuration for Anthropic Swift SDK
+title: "Anthropic Swift SDK"
+description: "Native Swift SDK for the Anthropic Claude API - iOS and macOS ready"
+url: "https://tthew.github.io"
+baseurl: "/anthropic-swift-sdk"
+
+# Theme configuration
+remote_theme: jekyll/minima
+minima:
+  skin: dark
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+header_pages:
+  - getting-started.md
+  - api-reference.md
+  - examples.md
+  - troubleshooting.md
+
+# GitHub repository
+github_username: tthew
+repository: anthropic-swift-sdk
+
+# Social links
+social_links:
+  github: tthew/anthropic-swift-sdk
+
+# SEO
+twitter:
+  username: tthew
+  card: summary
+
+# Exclude from processing
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - README.md
+  - CONTRIBUTING.md
+  - LICENSE
