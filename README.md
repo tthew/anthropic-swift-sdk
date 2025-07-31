@@ -32,6 +32,13 @@ A native Swift SDK for the Anthropic Claude API, designed for iOS and macOS appl
 - Swift 5.9+
 - Xcode 14.0+
 
+## [Documentation](https://tthew.github.io/anthropic-swift-sdk/)
+
+- [Getting Started](https://tthew.github.io/anthropic-swift-sdk/getting-started/)
+- [API Reference](https://tthew.github.io/anthropic-swift-sdk/api-reference/)
+- [Examples](https://tthew.github.io/anthropic-swift-sdk/examples/)
+- [Troubleshooting](https://tthew.github.io/anthropic-swift-sdk/troubleshooting/)
+
 ## Installation
 
 ### Swift Package Manager
