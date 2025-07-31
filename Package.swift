@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.9.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -57,24 +57,28 @@ let package = Package(
             name: "BasicChatExample",
             dependencies: ["AnthropicSDK"],
             path: "Examples",
+            exclude: ["ToolUseExample.swift", "BatchProcessingExample.swift", "FileAnalysisExample.swift"],
             sources: ["BasicChatExample.swift"]
         ),
         .executableTarget(
             name: "ToolUseExample",
             dependencies: ["AnthropicSDK"],
             path: "Examples",
+            exclude: ["BasicChatExample.swift", "BatchProcessingExample.swift", "FileAnalysisExample.swift"],
             sources: ["ToolUseExample.swift"]
         ),
         .executableTarget(
             name: "BatchProcessingExample",
             dependencies: ["AnthropicSDK"],
             path: "Examples",
+            exclude: ["BasicChatExample.swift", "ToolUseExample.swift", "FileAnalysisExample.swift"],
             sources: ["BatchProcessingExample.swift"]
         ),
         .executableTarget(
             name: "FileAnalysisExample", 
             dependencies: ["AnthropicSDK"],
             path: "Examples",
+            exclude: ["BasicChatExample.swift", "ToolUseExample.swift", "BatchProcessingExample.swift"],
             sources: ["FileAnalysisExample.swift"]
         )
     ],

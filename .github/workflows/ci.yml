@@ -44,6 +44,34 @@ jobs:
       uses: swift-actions/setup-swift@v2
       with:
         swift-version: ${{ matrix.swift-version }}
+      # Add explicit error handling for Swift setup issues
+      continue-on-error: false
+      id: swift-setup
+
+    # Fallback Swift setup if the primary method fails
+    - name: Fallback Swift Setup (if needed)
+      if: failure() && steps.swift-setup.outcome == 'failure'
+      run: |
+        echo "Primary Swift setup failed, attempting fallback..."
+        # Use the system Swift if available and compatible
+        if swift --version 2>/dev/null | grep -E "Swift version [5-9]\.[9-9][0-9]*"; then
+          echo "Compatible system Swift found, using that"
+          swift --version
+        else
+          echo "No compatible Swift found, exiting..."
+          exit 1
+        fi
+
+    - name: Verify Swift Installation
+      run: |
+        echo "Verifying Swift installation and toolchain setup..."
+        swift --version
+        which swift
+        echo "Swift Package Manager version:"
+        swift package --version
+        echo "Available toolchains:"
+        xcode-select -p || echo "Xcode command line tools not found"
+        ls -la /Applications/ | grep -i xcode || echo "No Xcode installations found"
         
     - name: Cache Swift Package Manager
       uses: actions/cache@v4
@@ -56,8 +84,37 @@ jobs:
           ${{ runner.os }}-swift-${{ matrix.swift-version }}-
           ${{ runner.os }}-swift-
     
+    - name: Validate Package Manifest
+      run: |
+        echo "Validating Package.swift manifest..."
+        echo "Current directory: $(pwd)"
+        echo "Package.swift contents:"
+        head -10 Package.swift
+        echo "Swift toolchain info:"
+        echo "TOOLCHAINS: ${TOOLCHAINS:-unset}"
+        echo "DEVELOPER_DIR: ${DEVELOPER_DIR:-unset}"
+        
+        # Try validation with error details
+        if ! swift package dump-package > /tmp/package-dump.json 2>&1; then
+          echo "❌ Package validation failed with error:"
+          cat /tmp/package-dump.json || echo "No error output available"
+          
+          # Try alternative validation approach
+          echo "Attempting alternative package validation..."
+          swift package describe --type json || echo "Alternative validation also failed"
+          exit 1
+        else
+          echo "✅ Package.swift validation passed"
+          echo "Package manifest parsed successfully"
+        fi
+        
     - name: Build Package
-      run: swift build -v
+      run: |
+        echo "Building AnthropicSDK package..."
+        # Clear any previous build artifacts that might cause issues
+        rm -rf .build || true
+        # Build with verbose output for debugging
+        swift build -v
       
     - name: Build Examples
       run: |
