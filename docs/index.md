@@ -3,8 +3,6 @@ layout: home
 title: "Anthropic Swift SDK"
 ---
 
-# Anthropic Swift SDK
-
 [![CI](https://github.com/tthew/anthropic-swift-sdk/workflows/CI/badge.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
 [![iOS Tests](https://img.shields.io/badge/iOS%20Tests-iOS%2015%2B%20Simulator-blue.svg)](https://github.com/tthew/anthropic-swift-sdk/actions/workflows/ci.yml)
 [![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-orange.svg)](https://swift.org)
