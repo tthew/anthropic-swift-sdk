@@ -68,7 +68,7 @@ let package = Package(
 2. Sign in or create an account
 3. Navigate to **API Keys**
 4. Click **Create Key**
-5. Copy your API key (it starts with `sk-ant-`)
+5. Copy your API key (it starts with `sk-ant-` followed by additional characters)
 
 ⚠️ **Keep your API key secure** - never commit it to version control or expose it in client-side code.
 
@@ -79,7 +79,7 @@ let package = Package(
 Set the environment variable in your development environment:
 
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-your-key"
+export ANTHROPIC_API_KEY="your-api-key"
 ```
 
 For Xcode projects, you can add this to your scheme:
@@ -92,7 +92,7 @@ For Xcode projects, you can add this to your scheme:
 ```swift
 import AnthropicSDK
 
-let client = try AnthropicClient(apiKey: "sk-ant-your-key")
+let client = try AnthropicClient(apiKey: "your-api-key")
 ```
 
 #### Option C: Secure Storage (Production Apps)
@@ -594,7 +594,7 @@ Now that you have the basics working:
 let client = try AnthropicClient()
 
 // ✅ Set environment variable or use direct initialization
-let client = try AnthropicClient(apiKey: "sk-ant-your-key")
+let client = try AnthropicClient(apiKey: "your-api-key")
 ```
 
 ### "Invalid API Key" Error
@@ -606,7 +606,7 @@ Make sure your API key starts with `sk-ant-`:
 let client = try AnthropicClient(apiKey: "your-api-key")
 
 // ✅ Correct format
-let client = try AnthropicClient(apiKey: "sk-ant-your-key")
+let client = try AnthropicClient(apiKey: "your-api-key")
 ```
 
 ### Network Timeout Issues

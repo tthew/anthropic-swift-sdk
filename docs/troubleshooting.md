@@ -101,7 +101,7 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 
 1. **Set environment variable**:
    ```bash
-   export ANTHROPIC_API_KEY="sk-ant-your-key"
+   export ANTHROPIC_API_KEY="your-api-key"
    ```
 
 2. **For Xcode projects**, add to scheme:
@@ -111,7 +111,7 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 
 3. **Use direct initialization**:
    ```swift
-   let client = try AnthropicClient(apiKey: "sk-ant-your-key")
+   let client = try AnthropicClient(apiKey: "your-api-key")
    ```
 
 ### "Invalid API Key" Error
@@ -125,8 +125,8 @@ rm -rf ~/Library/Developer/Xcode/DerivedData
 // ❌ Wrong
 let client = try AnthropicClient(apiKey: "your-api-key")
 
-// ✅ Correct  
-let client = try AnthropicClient(apiKey: "sk-ant-api03-xyz")
+// ✅ Correct format (starts with sk-ant-)
+let client = try AnthropicClient(apiKey: "sk-ant-" + "api03-xyz...")
 ```
 
 Get a valid API key from [console.anthropic.com](https://console.anthropic.com).

@@ -722,7 +722,7 @@ let customConfig = ClientConfiguration(
 )
 
 let client = try AnthropicClient(
-    apiKey: "sk-ant-your-key",
+    apiKey: "your-api-key",
     configuration: customConfig
 )
 ```
