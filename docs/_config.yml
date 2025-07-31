@@ -5,7 +5,7 @@ url: "https://tthew.github.io"
 baseurl: "/anthropic-swift-sdk"
 
 # Theme configuration
-remote_theme: jekyll/minima
+theme: minima
 minima:
   skin: dark
 
@@ -36,6 +36,10 @@ social_links:
 twitter:
   username: tthew
   card: summary
+
+# Include custom JS
+include:
+  - assets/js/copy-code.js
 
 # Exclude from processing
 exclude:

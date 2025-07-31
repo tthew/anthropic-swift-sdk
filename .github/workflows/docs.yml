@@ -47,7 +47,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           cd docs
-          bundle exec jekyll build --baseurl "/anthropic-swift-sdk"
+          bundle exec jekyll build --baseurl "/anthropic-swift-sdk" --verbose
         env:
           JEKYLL_ENV: production
           
