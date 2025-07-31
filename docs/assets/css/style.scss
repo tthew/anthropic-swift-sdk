@@ -1,0 +1,321 @@
+---
+---
+
+@import "minima";
+
+// Custom styles for Anthropic Swift SDK documentation
+
+// Color scheme
+:root {
+  --anthropic-orange: #ff6b35;
+  --anthropic-blue: #1a73e8;
+  --anthropic-dark: #1a1a1a;
+  --anthropic-light: #f8f9fa;
+  --code-bg: #f6f8fa;
+  --border-color: #e1e4e8;
+}
+
+// Enhanced typography
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-size: 2.5em;
+  border-bottom: 2px solid var(--anthropic-orange);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 2em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+
+// Enhanced code blocks
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  overflow-x: auto;
+  position: relative;
+  
+  code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+// Inline code
+code {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+}
+
+// Copy button for code blocks - will be added via JS
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--anthropic-blue);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+  
+  &:hover {
+    background: var(--anthropic-orange);
+  }
+}
+
+pre:hover .copy-button {
+  opacity: 1;
+}
+
+// Add JS for copy functionality
+.highlight {
+  position: relative;
+}
+
+// Enhanced tables
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  
+  th, td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+  }
+  
+  th {
+    background: var(--anthropic-light);
+    font-weight: 600;
+  }
+  
+  tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+// Navigation enhancements
+.site-nav {
+  .page-link {
+    font-weight: 500;
+    transition: color 0.2s;
+    
+    &:hover {
+      color: var(--anthropic-orange);
+    }
+  }
+}
+
+// Badges and labels
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  
+  &.ios {
+    background: #007AFF;
+    color: white;
+  }
+  
+  &.swift {
+    background: #FA7343;
+    color: white;
+  }
+  
+  &.github {
+    background: #333;
+    color: white;
+  }
+}
+
+// Alert boxes
+.alert {
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 8px;
+  border-left: 4px solid;
+  
+  &.warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+  }
+  
+  &.info {
+    background: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+  }
+  
+  &.success {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+  }
+}
+
+// Feature highlights
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin: 32px 0;
+  
+  .feature-item {
+    padding: 24px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    
+    h3 {
+      margin-top: 0;
+      color: var(--anthropic-blue);
+    }
+    
+    .feature-icon {
+      font-size: 2em;
+      margin-bottom: 16px;
+    }
+  }
+}
+
+// Button enhancements
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--anthropic-blue);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: var(--anthropic-orange);
+    color: white;
+  }
+  
+  &.btn-outline {
+    background: transparent;
+    color: var(--anthropic-blue);
+    border: 1px solid var(--anthropic-blue);
+    
+    &:hover {
+      background: var(--anthropic-blue);
+      color: white;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  pre {
+    font-size: 12px;
+  }
+  
+  h1 {
+    font-size: 2em;
+  }
+  
+  h2 {
+    font-size: 1.5em;
+  }
+}
+
+// Table of contents
+.toc {
+  background: var(--anthropic-light);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  
+  h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+  
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    
+    li {
+      margin: 4px 0;
+    }
+  }
+  
+  a {
+    text-decoration: none;
+    color: var(--anthropic-blue);
+    
+    &:hover {
+      color: var(--anthropic-orange);
+    }
+  }
+}
+
+// Footer customization
+.site-footer {
+  background: var(--anthropic-dark);
+  color: #ccc;
+  
+  .footer-heading {
+    color: white;
+  }
+  
+  a {
+    color: #ccc;
+    
+    &:hover {
+      color: var(--anthropic-orange);
+    }
+  }
+}
+
+// Header customization
+.site-header {
+  border-bottom: 1px solid var(--border-color);
+  background: white;
+  
+  .site-title {
+    font-weight: 700;
+    color: var(--anthropic-dark);
+    
+    &:hover {
+      color: var(--anthropic-orange);
+    }
+  }
+}
