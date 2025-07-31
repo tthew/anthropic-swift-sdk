@@ -79,7 +79,7 @@ let package = Package(
 Set the environment variable in your development environment:
 
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-your-api-key-here"
+export ANTHROPIC_API_KEY="sk-ant-your-key"
 ```
 
 For Xcode projects, you can add this to your scheme:
@@ -92,7 +92,7 @@ For Xcode projects, you can add this to your scheme:
 ```swift
 import AnthropicSDK
 
-let client = try AnthropicClient(apiKey: "sk-ant-your-api-key-here")
+let client = try AnthropicClient(apiKey: "sk-ant-your-key")
 ```
 
 #### Option C: Secure Storage (Production Apps)
@@ -606,7 +606,7 @@ Make sure your API key starts with `sk-ant-`:
 let client = try AnthropicClient(apiKey: "your-api-key")
 
 // ✅ Correct format
-let client = try AnthropicClient(apiKey: "sk-ant-your-actual-key")
+let client = try AnthropicClient(apiKey: "sk-ant-your-key")
 ```
 
 ### Network Timeout Issues
