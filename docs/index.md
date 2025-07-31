@@ -46,7 +46,7 @@ dependencies: [
 import AnthropicSDK
 
 // Initialize client
-let client = try AnthropicClient(apiKey: "your-api-key")
+let client = try AnthropicClient(apiKey: "your-token")
 
 // Send a message
 let response = try await client.sendMessage("Hello, Claude!")
